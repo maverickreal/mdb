@@ -28,6 +28,6 @@ unix {
 
 DISTFILES += Defines.pri
 
-mdb-tests.depends=mdb
-mdb-cli.depends=mdb
+#mdb-tests.depends=mdb
+#mdb-cli.depends=mdb
 message(In $$PWD)
