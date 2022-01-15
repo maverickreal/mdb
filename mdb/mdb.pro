@@ -7,7 +7,6 @@ TEMPLATE = lib
 # target is a static library
 CONFIG += staticlib
 
-# utileze/enable support for c++17
 CONFIG += c++17
 CONFIG -= app_bundle
 
@@ -27,8 +26,8 @@ unix {
 }
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += \
-    Defines.pri
+DISTFILES += Defines.pri
 
 mdb-tests.depends=mdb
 mdb-cli.depends=mdb
+message(In $$PWD)

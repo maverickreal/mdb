@@ -2,7 +2,8 @@
 TEMPLATE = subdirs
 
 # Since it's a subdirs proj, the subdirs
-SUBDIRS += \
-    mdb \
+SUBDIRS += mdb \
     mdb-cli \
     mdb-tests
+
+message(In $$PWD)

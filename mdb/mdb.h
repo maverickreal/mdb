@@ -7,4 +7,4 @@ public:
     Mdb();
 };
 
-#endif // MDB_H
+#endif
