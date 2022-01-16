@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.1, 2022-01-15T14:59:21. -->
+<!-- Written by QtCreator 6.0.1, 2022-01-16T22:08:03. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -67,7 +67,10 @@
     <value type="bool" key="AutoTest.Framework.QtQuickTest">true</value>
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
-   <valuemap type="QVariantMap" key="AutoTest.CheckStates"/>
+   <valuemap type="QVariantMap" key="AutoTest.CheckStates">
+    <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp:/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp">Checked</value>
+    <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp:Create a fresh database">Checked</value>
+   </valuemap>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
    <valuelist type="QVariantList" key="ClangCodeModel.CustomCommandLineKey"/>
