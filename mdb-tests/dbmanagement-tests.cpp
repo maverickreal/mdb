@@ -16,13 +16,14 @@ namespace fs=std::filesystem;
 TEST_CASE("Create a fresh database", "[createFreshDB]"){
     SECTION("Default configuration"){
         std::string dbName("freshDB");
-        database db(Mdb::createFreshDB(dbName));
+        const std::string fp("fp");
+        database db(Mdb::createFreshDB(dbName, fp));
 
         /* status(o) -> returns info about type and attributes of the fs object o
          * https://en.cppreference.com/w/cpp/filesystem/directory_iterator
         */
         REQUIRE(fs::is_directory(fs::status(db.getDirectory())));
         const auto&p=fs::directory_iterator(db.getDirectory());
-        Require(p==end(p));
+        REQUIRE(p==fs::end(p));
     }
 }
