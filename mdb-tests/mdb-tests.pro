@@ -15,4 +15,5 @@ HEADERS += catch.hpp \
     tests.h
 
 SOURCES += dbmanagement-tests.cpp \
-           # main.cpp
+ \           # main.cpp
+    keyValue-tests.cpp
