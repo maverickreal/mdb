@@ -3,9 +3,11 @@
 #include "mdb/mdb.h"
 #include "string"
 #include "mdb/database.h"
+
 /* Healthy reminder -> https://www.geeksforgeeks.org/namespace-in-c/
  * set fs namespace to filesystem from std
 */
+
 namespace fs=std::filesystem;
 
 /* TEST_CASE(s1, s2){testCaseDefinition}
@@ -13,6 +15,7 @@ namespace fs=std::filesystem;
  * ALSO see -> https://codingnest.com/the-little-things-testing-with-catch-2/
  * s1 -> name of the test case, s2 -> tag for the test case
 */
+
 TEST_CASE("Create a fresh database", "[createFreshDB]"){
     SECTION("Default configuration"){
         std::string dbName("freshDB");
@@ -22,6 +25,7 @@ TEST_CASE("Create a fresh database", "[createFreshDB]"){
         /* status(o) -> returns info about type and attributes of the fs object o
          * https://en.cppreference.com/w/cpp/filesystem/directory_iterator
         */
+
         REQUIRE(fs::is_directory(fs::status(db.getDirectory())));
         const auto&p=fs::directory_iterator(db.getDirectory());
         REQUIRE(p==fs::end(p));

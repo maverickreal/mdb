@@ -28,18 +28,21 @@ void database::setKeyValue(const std::string&key, const std::string&value){
 /* Healthy reminder -> https://www.cplusplus.com/reference/fstream/ifstream/
  * https://www.cplusplus.com/reference/istream/istream/tellg/
  * https://www.cplusplus.com/reference/istream/istream/seekg/
+ * https://www.cplusplus.com/reference/iterator/istreambuf_iterator/
+ * A stream is a FIFO data structure. A buffer is random access.
+ * A buffer is an array which contains some (raw) data, a stream is an abstraction of a buffer ( each stream has a buffer ).
+ * A buffer is a region of memory used to temporarily hold data while it is being moved from one place to another.
+ * A stream is a source or sink of data, usually individual bytes or characters.
+ * ios and istreambuf_iterator operate upon stream and buffer resp.
 */
-std::string getKeyValue(const std::string&key){
-    std::ifstream ifs(memberFullPath"/"+key+"-string.kv");
+std::string database::getKeyValue(const std::string&key){
+    std::ifstream ifs(memberFullPath+"/"+key+"-string.kv");
     std::string value;
     ifs.seekg(0,std::ios::end);
     value.reserve(ifs.tellg());
-    ifs.seekg(0, std::ios::end);
-    return "";
-}
-
-std::string database::getKeyValue(const std::string&key){
-    return "sigma";
+    ifs.seekg(0, std::ios::beg);
+    value.assign(std::istreambuf_iterator<char>(ifs), std::istreambuf_iterator<char>());
+    return value;
 }
 
 database database::createEmpty(const std::string&dbName){
