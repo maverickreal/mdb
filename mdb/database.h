@@ -6,6 +6,7 @@
 class database
 {
 public:
+    bool destroy();
     void setKeyValue(const std::string&key, const std::string&value);
     std::string getKeyValue(const std::string&key);
     database(const std::string&dbName, const std::string&fullPath);

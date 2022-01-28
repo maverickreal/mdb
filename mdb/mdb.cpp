@@ -9,6 +9,6 @@ Mdb::Mdb()
 {
 }
 
-database Mdb::createFreshDB(const std::string&dbName, const std::string&fullPath){
-    return database(dbName, fullPath);
+database Mdb::createFreshDB(const std::string&dbName){
+    return database::createEmpty(dbName);
 }

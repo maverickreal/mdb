@@ -7,7 +7,7 @@ class Mdb
 {
 public:
     Mdb();
-    static database createFreshDB(const std::string&dbName, const std::string&fullPath);
+    static database createFreshDB(const std::string&dbName);
 };
 
 #endif

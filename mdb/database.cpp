@@ -8,7 +8,7 @@ namespace fs=std::filesystem;
 
 database::database(const std::string&dbName, const std::string&fullPath): memberName(dbName), memberFullPath(fullPath)
 {
-    std::cout<<dbName<<'\t'<<fullPath<<'\n';
+    std::cout<<"\n___"<<dbName<<'\t'<<fullPath<<"___\n";
 }
 
 /* Healthy reminder -> https://www.cplusplus.com/reference/fstream/ofstream/
@@ -58,4 +58,13 @@ database database::createEmpty(const std::string&dbName){
 
 std::string database::getDirectory(){
     return memberFullPath;
+}
+
+bool database::destroy(){
+    if(fs::exists(memberFullPath)){
+        // delete the dir
+        fs::remove_all(memberFullPath);
+        return true;
+    }
+    return false;
 }
