@@ -15,9 +15,11 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # forming the sources and header files
-SOURCES += mdb.cpp
+SOURCES += mdb.cpp \
+    database.cpp
 
-HEADERS += mdb.h
+HEADERS += mdb.h \
+    database.h
 
 # Default rules for deployment.
 # a{statement} -> scope declaratio; similar to if; runs if a is true

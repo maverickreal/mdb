@@ -1,5 +1,5 @@
 #include "mdb.h"
-#include<iostream>
+#include "database.h"
 using namespace std;
 
 /* Healthy reminders: https://www.educative.io/edpresso/what-is-the-using-keyword-in-cpp
@@ -8,7 +8,7 @@ using namespace std;
 Mdb::Mdb()
 {
 }
-int main(){
-    cout<<"Helloooooooooooooo Worldddddd";
-    return 0;
+
+database Mdb::createFreshDB(const std::string&dbName){
+    return database::createEmpty(dbName);
 }

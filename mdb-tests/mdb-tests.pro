@@ -11,10 +11,9 @@ unix:CONFIG(release, debug|release): LIBS+= -L$$OUT_PWD/../mdb/ -lmdb
 else:unix:CONFIG(debug, debug|release): LIBS+= -L$$OUT_PWD/../mdb/ -lmdb
 message(In $$PWD)
 
-HEADERS += \
-    catch.hpp \
+HEADERS += catch.hpp \
     tests.h
 
-SOURCES += \
-    dbmanagement-tests.cpp \
-    main.cpp
+SOURCES += dbmanagement-tests.cpp \
+ \           # main.cpp
+    keyValue-tests.cpp
