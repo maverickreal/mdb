@@ -56,6 +56,12 @@ database database::createEmpty(const std::string&dbName){
 
 }
 
+database database::load(const std::string &dbName){
+    const std::string baseDir=".mdb",
+            dbDir=baseDir+"/"+dbName;
+        return database(dbName, dbDir);
+}
+
 std::string database::getDirectory(){
     return memberFullPath;
 }

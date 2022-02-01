@@ -12,3 +12,7 @@ Mdb::Mdb()
 database Mdb::createFreshDB(const std::string&dbName){
     return database::createEmpty(dbName);
 }
+
+database Mdb::loadDB(const std::string &dbName){
+    return database::load(dbName);
+}

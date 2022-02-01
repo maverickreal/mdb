@@ -91,7 +91,7 @@ namespace cxxopts
 } // namespace cxxopts
 
 //when we ask cxxopts to use Unicode, help strings are processed using ICU,
-//which ress in the correct lengths being computed for strings when they
+//which results in the correct lengths being computed for strings when they
 //are formatted for the help output
 //it is necessary to make sure that <unicode/unistr.h> can be found by the
 //compiler, and that icu-uc is linked in to the binary.
@@ -211,10 +211,10 @@ namespace cxxopts
   std::string
   toUTF8String(const String& s)
   {
-    std::string res;
-    s.toUTF8String(res);
+    std::string result;
+    s.toUTF8String(result);
 
-    return res;
+    return result;
   }
 
   inline
@@ -749,48 +749,48 @@ namespace cxxopts
 
       inline bool IsTrueText(const std::string &text)
       {
-        std::smatch res;
-        std::regex_match(text, res, truthy_pattern);
-        return !res.empty();
+        std::smatch result;
+        std::regex_match(text, result, truthy_pattern);
+        return !result.empty();
       }
 
       inline bool IsFalseText(const std::string &text)
       {
-        std::smatch res;
-        std::regex_match(text, res, falsy_pattern);
-        return !res.empty();
+        std::smatch result;
+        std::regex_match(text, result, falsy_pattern);
+        return !result.empty();
       }
 
       inline std::pair<std::string, std::string> SplitSwitchDef(const std::string &text)
       {
-        std::match_ress<const char*> res;
-        std::regex_match(text.c_str(), res, option_specifier);
-        if (res.empty())
+        std::match_results<const char*> result;
+        std::regex_match(text.c_str(), result, option_specifier);
+        if (result.empty())
         {
           throw_or_mimic<invalid_option_format_error>(text);
         }
 
-        const std::string& short_sw = res[2];
-        const std::string& long_sw = res[3];
+        const std::string& short_sw = result[2];
+        const std::string& long_sw = result[3];
 
         return std::pair<std::string, std::string>(short_sw, long_sw);
       }
 
       inline ArguDesc ParseArgument(const char *arg, bool &matched)
       {
-        std::match_ress<const char*> res;
-        std::regex_match(arg, res, option_matcher);
-        matched = !res.empty();
+        std::match_results<const char*> result;
+        std::regex_match(arg, result, option_matcher);
+        matched = !result.empty();
 
         ArguDesc argu_desc;
         if (matched) {
-          argu_desc.arg_name = res[1].str();
-          argu_desc.set_value = res[2].length() > 0;
-          argu_desc.value = res[3].str();
-          if (res[4].length() > 0)
+          argu_desc.arg_name = result[1].str();
+          argu_desc.set_value = result[2].length() > 0;
+          argu_desc.value = result[3].str();
+          if (result[4].length() > 0)
           {
             argu_desc.grouping = true;
-            argu_desc.arg_name = res[4].str();
+            argu_desc.arg_name = result[4].str();
           }
         }
 
@@ -876,7 +876,7 @@ namespace cxxopts
       const uint8_t       base        = int_desc.base.length() > 0 ? 16 : 10;
       const std::string & value_match = int_desc.value;
 
-      US res = 0;
+      US result = 0;
 
       for (char ch : value_match)
       {
@@ -899,24 +899,24 @@ namespace cxxopts
           throw_or_mimic<argument_incorrect_type>(text);
         }
 
-        const US next = static_cast<US>(res * base + digit);
-        if (res > next)
+        const US next = static_cast<US>(result * base + digit);
+        if (result > next)
         {
           throw_or_mimic<argument_incorrect_type>(text);
         }
 
-        res = next;
+        result = next;
       }
 
-      detail::check_signed_range<T>(negative, res, text);
+      detail::check_signed_range<T>(negative, result, text);
 
       if (negative)
       {
-        checked_negate<T>(value, res, text, std::integral_constant<bool, is_signed>());
+        checked_negate<T>(value, result, text, std::integral_constant<bool, is_signed>());
       }
       else
       {
-        value = static_cast<T>(res);
+        value = static_cast<T>(result);
       }
     }
 
@@ -999,9 +999,9 @@ namespace cxxopts
     void
     parse_value(const std::string& text, std::optional<T>& value)
     {
-      T res;
-      parse_value(text, res);
-      value = std::move(res);
+      T result;
+      parse_value(text, result);
+      value = std::move(result);
     }
 #endif
 
@@ -1035,8 +1035,8 @@ namespace cxxopts
 
       public:
       abstract_value()
-      : m_res(std::make_shared<T>())
-      , m_store(m_res.get())
+      : m_result(std::make_shared<T>())
+      , m_store(m_result.get())
       {
       }
 
@@ -1051,10 +1051,10 @@ namespace cxxopts
 
       abstract_value(const abstract_value& rhs)
       {
-        if (rhs.m_res)
+        if (rhs.m_result)
         {
-          m_res = std::make_shared<T>();
-          m_store = m_res.get();
+          m_result = std::make_shared<T>();
+          m_store = m_result.get();
         }
         else
         {
@@ -1143,13 +1143,13 @@ namespace cxxopts
       {
         if (m_store == nullptr)
         {
-          return *m_res;
+          return *m_result;
         }
         return *m_store;
       }
 
       protected:
-      std::shared_ptr<T> m_res{};
+      std::shared_ptr<T> m_result{};
       T* m_store{};
 
       bool m_default = false;
@@ -1441,9 +1441,9 @@ namespace cxxopts
     T
     as() const
     {
-      T res;
-      values::parse_value(m_value, res);
-      return res;
+      T result;
+      values::parse_value(m_value, result);
+      return result;
     }
 
     private:
@@ -1454,7 +1454,7 @@ namespace cxxopts
   using ParsedHashMap = std::unordered_map<size_t, OptionValue>;
   using NameHashMap = std::unordered_map<std::string, size_t>;
 
-  class Parseres
+  class ParseResult
   {
     public:
     class Iterator
@@ -1469,7 +1469,7 @@ namespace cxxopts
       Iterator() = default;
       Iterator(const Iterator&) = default;
 
-      Iterator(const Parseres *pr, bool end=false)
+      Iterator(const ParseResult *pr, bool end=false)
       : m_pr(pr)
       , m_iter(end? pr->m_defaults.end(): pr->m_sequential.begin())
       {
@@ -1514,14 +1514,14 @@ namespace cxxopts
       }
 
       private:
-      const Parseres* m_pr;
+      const ParseResult* m_pr;
       std::vector<KeyValue>::const_iterator m_iter;
     };
 
-    Parseres() = default;
-    Parseres(const Parseres&) = default;
+    ParseResult() = default;
+    ParseResult(const ParseResult&) = default;
 
-    Parseres(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential,
+    ParseResult(NameHashMap&& keys, ParsedHashMap&& values, std::vector<KeyValue> sequential,
             std::vector<KeyValue> default_opts, std::vector<std::string>&& unmatched_args)
     : m_keys(std::move(keys))
     , m_values(std::move(values))
@@ -1531,8 +1531,8 @@ namespace cxxopts
     {
     }
 
-    Parseres& operator=(Parseres&&) = default;
-    Parseres& operator=(const Parseres&) = default;
+    ParseResult& operator=(ParseResult&&) = default;
+    ParseResult& operator=(const ParseResult&) = default;
 
     Iterator
     begin() const
@@ -1606,16 +1606,16 @@ namespace cxxopts
     const std::string
     arguments_string() const
     {
-      std::string res;
+      std::string result;
       for(const auto& kv: m_sequential)
       {
-        res += kv.key() + " = " + kv.value() + "\n";
+        result += kv.key() + " = " + kv.value() + "\n";
       }
       for(const auto& kv: m_defaults)
       {
-        res += kv.key() + " = " + kv.value() + " " + "(default)" + "\n";
+        result += kv.key() + " = " + kv.value() + " " + "(default)" + "\n";
       }
-      return res;
+      return result;
     }
 
     private:
@@ -1662,7 +1662,7 @@ namespace cxxopts
     {
     }
 
-    Parseres
+    ParseResult
     parse(int argc, const char* const* argv);
 
     bool
@@ -1769,7 +1769,7 @@ namespace cxxopts
       return *this;
     }
 
-    Parseres
+    ParseResult
     parse(int argc, const char* const* argv);
 
     OptionAdder
@@ -1845,12 +1845,12 @@ namespace cxxopts
     void
     generate_group_help
     (
-      String& res,
+      String& result,
       const std::vector<std::string>& groups
     ) const;
 
     void
-    generate_all_groups_help(String& res) const;
+    generate_all_groups_help(String& result) const;
 
     std::string m_program{};
     String m_help_string{};
@@ -1910,24 +1910,24 @@ namespace cxxopts
       const auto& s = o.s;
       const auto& l = o.l;
 
-      String res = "  ";
+      String result = "  ";
 
       if (!s.empty())
       {
-        res += "-" + toLocalString(s);
+        result += "-" + toLocalString(s);
         if (!l.empty())
         {
-          res += ",";
+          result += ",";
         }
       }
       else
       {
-        res += "   ";
+        result += "   ";
       }
 
       if (!l.empty())
       {
-        res += " --" + toLocalString(l);
+        result += " --" + toLocalString(l);
       }
 
       auto arg = !o.arg_help.empty() ? toLocalString(o.arg_help) : "arg";
@@ -1936,15 +1936,15 @@ namespace cxxopts
       {
         if (o.has_implicit)
         {
-          res += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
+          result += " [=" + arg + "(=" + toLocalString(o.implicit_value) + ")]";
         }
         else
         {
-          res += " " + arg;
+          result += " " + arg;
         }
       }
 
-      return res;
+      return result;
     }
 
     String
@@ -1970,7 +1970,7 @@ namespace cxxopts
         }
       }
 
-      String res;
+      String result;
 
       if (tab_expansion)
       {
@@ -2043,20 +2043,20 @@ namespace cxxopts
 
         if (appendNewLine)
         {
-          stringAppend(res, startLine, current);
+          stringAppend(result, startLine, current);
           startLine = current;
           lastSpace = current;
 
           if (*previous != '\n')
           {
-            stringAppend(res, "\n");
+            stringAppend(result, "\n");
           }
 
-          stringAppend(res, start, ' ');
+          stringAppend(result, start, ' ');
 
           if (*previous != '\n')
           {
-            stringAppend(res, lastSpace, current);
+            stringAppend(result, lastSpace, current);
           }
 
           onlyWhiteSpace = true;
@@ -2071,10 +2071,10 @@ namespace cxxopts
       //append whatever is left but ignore whitespace
       if (!onlyWhiteSpace)
       {
-        stringAppend(res, startLine, previous);
+        stringAppend(result, startLine, previous);
       }
 
-      return res;
+      return result;
     }
   } // namespace
 
@@ -2176,8 +2176,8 @@ OptionParser::parse_option
 )
 {
   auto hash = value->hash();
-  auto& res = m_parsed[hash];
-  res.parse(value, arg);
+  auto& result = m_parsed[hash];
+  result.parse(value, arg);
 
   m_sequential.emplace_back(value->long_name(), arg);
 }
@@ -2236,8 +2236,8 @@ OptionParser::consume_positional(const std::string& a, PositionalListIterator& n
     {
       if (!iter->second->value().is_container())
       {
-        auto& res = m_parsed[iter->second->hash()];
-        if (res.count() == 0)
+        auto& result = m_parsed[iter->second->hash()];
+        if (result.count() == 0)
         {
           add_to_option(iter, *next, a);
           ++next;
@@ -2279,7 +2279,7 @@ Options::parse_positional(std::initializer_list<std::string> options)
 }
 
 inline
-Parseres
+ParseResult
 Options::parse(int argc, const char* const* argv)
 {
   OptionParser parser(*m_options, m_positional, m_allow_unrecognised);
@@ -2287,7 +2287,7 @@ Options::parse(int argc, const char* const* argv)
   return parser.parse(argc, argv);
 }
 
-inline Parseres
+inline ParseResult
 OptionParser::parse(int argc, const char* const* argv)
 {
   int current = 1;
@@ -2453,7 +2453,7 @@ OptionParser::parse(int argc, const char* const* argv)
 
   finalise_aliases();
 
-  Parseres parsed(std::move(m_keys), std::move(m_parsed), std::move(m_sequential), std::move(m_defaults), std::move(unmatched));
+  ParseResult parsed(std::move(m_keys), std::move(m_parsed), std::move(m_sequential), std::move(m_defaults), std::move(unmatched));
   return parsed;
 }
 
@@ -2556,11 +2556,11 @@ Options::help_one_group(const std::string& g) const
 
   size_t longest = 0;
 
-  String res;
+  String result;
 
   if (!g.empty())
   {
-    res += toLocalString(" " + g + " options:\n");
+    result += toLocalString(" " + g + " options:\n");
   }
 
   for (const auto& o : group->second.options)
@@ -2595,32 +2595,32 @@ Options::help_one_group(const std::string& g) const
 
     auto d = format_description(o, longest + OPTION_DESC_GAP, allowed, m_tab_expansion);
 
-    res += fiter->first;
+    result += fiter->first;
     if (stringLength(fiter->first) > longest)
     {
-      res += '\n';
-      res += toLocalString(std::string(longest + OPTION_DESC_GAP, ' '));
+      result += '\n';
+      result += toLocalString(std::string(longest + OPTION_DESC_GAP, ' '));
     }
     else
     {
-      res += toLocalString(std::string(longest + OPTION_DESC_GAP -
+      result += toLocalString(std::string(longest + OPTION_DESC_GAP -
         stringLength(fiter->first),
         ' '));
     }
-    res += d;
-    res += '\n';
+    result += d;
+    result += '\n';
 
     ++fiter;
   }
 
-  return res;
+  return result;
 }
 
 inline
 void
 Options::generate_group_help
 (
-  String& res,
+  String& result,
   const std::vector<std::string>& print_groups
 ) const
 {
@@ -2631,17 +2631,17 @@ Options::generate_group_help
     {
       continue;
     }
-    res += group_help_text;
+    result += group_help_text;
     if (i < print_groups.size() - 1)
     {
-      res += '\n';
+      result += '\n';
     }
   }
 }
 
 inline
 void
-Options::generate_all_groups_help(String& res) const
+Options::generate_all_groups_help(String& result) const
 {
   std::vector<std::string> all_groups;
 
@@ -2655,32 +2655,32 @@ Options::generate_all_groups_help(String& res) const
     }
   );
 
-  generate_group_help(res, all_groups);
+  generate_group_help(result, all_groups);
 }
 
 inline
 std::string
 Options::help(const std::vector<std::string>& help_groups) const
 {
-  String res = m_help_string + "\nUsage:\n  " +
+  String result = m_help_string + "\nUsage:\n  " +
     toLocalString(m_program) + " " + toLocalString(m_custom_help);
 
   if (!m_positional.empty() && !m_positional_help.empty()) {
-    res += " " + toLocalString(m_positional_help);
+    result += " " + toLocalString(m_positional_help);
   }
 
-  res += "\n\n";
+  result += "\n\n";
 
   if (help_groups.empty())
   {
-    generate_all_groups_help(res);
+    generate_all_groups_help(result);
   }
   else
   {
-    generate_group_help(res, help_groups);
+    generate_group_help(result, help_groups);
   }
 
-  return toUTF8String(res);
+  return toUTF8String(result);
 }
 
 inline
@@ -2711,4 +2711,4 @@ Options::group_help(const std::string& group) const
 
 } // namespace cxxopts
 
-#endif
+#endif //CXXOPTS_HPP_INCLUDED

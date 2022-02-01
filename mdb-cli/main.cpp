@@ -42,11 +42,39 @@ int main(int argCnt, char*args[]){
             logUsage();
             return 1;
         }
-        std::string dbname=res["n"].as<std::string>(),
+        std::string dbName=res["n"].as<std::string>(),
                 k(res["k"].as<std::string>()),
                 v(res["v"].as<std::string>());
-        database db(Mdb:loadDB(dbName));
+        database db(Mdb::loadDB(dbName));
         db.setKeyValue(k,v);
+        return 0;
+    }
+    if(res.count("g")==1){
+        if (!res.count("n")) {
+            std::cout << "ERROR:\tMust provide database name with -n <name>\n";
+            logUsage();
+            return 1;
+        }
+        if (!res.count("k")) {
+            std::cout << "ERROR:\tMust provide a key with -k <name>\n";
+            logUsage();
+            return 1;
+        }
+        std::string dbName=res["n"].as<std::string>(),
+                key=res["k"].as<std::string>();
+        database db(Mdb::loadDB(dbName));
+        std::cout<<db.getKeyValue(key)<<'\n';
+        return 0;
+    }
+    if(res.count("d")==1){
+        if(!res.count("n")) {
+            std::cout << "ERROR:\tMust provide database name with -n <name>\n";
+            logUsage();
+            return 1;
+        }
+        std::string dbName=res["n"].as<std::string>();
+        database db(Mdb::loadDB(dbName));
+        std::cout<<(db.destroy()?"Destroyed":"Failed")<<'\n';
         return 0;
     }
     std::cout<<"ERROR:\tNo command provided!\n";
