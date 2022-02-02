@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 6.0.2, 2022-01-28T18:20:05. -->
+<!-- Written by QtCreator 6.0.2, 2022-02-01T16:56:00. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -70,6 +70,7 @@
    <valuemap type="QVariantMap" key="AutoTest.CheckStates">
     <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp:/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp">Checked</value>
     <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp:Create a fresh database">Checked</value>
+    <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/dbmanagement-tests.cpp:lOAD A DATABASE">Checked</value>
     <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/keyValue-tests.cpp:/home/maverick/Documents/mdb/mdb-tests/keyValue-tests.cpp">Checked</value>
     <value type="Qt::CheckState" key="1@/home/maverick/Documents/mdb/mdb-tests/keyValue-tests.cpp:Store and retrieve values">Checked</value>
    </valuemap>

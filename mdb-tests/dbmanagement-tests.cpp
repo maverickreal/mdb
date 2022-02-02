@@ -27,7 +27,20 @@ TEST_CASE("Create a fresh database", "[createFreshDB]"){
 
         REQUIRE(fs::is_directory(fs::status(db.getDirectory())));
         db.destroy();
-//        const auto&p=fs::directory_iterator(db.getDirectory());
-//        REQUIRE(p==fs::end(p));
+        const auto&p=fs::directory_iterator(db.getDirectory());
+        REQUIRE(p==fs::end(p));
+    }
+}
+
+TEST_CASE("lOAD A DATABASE", "[loadDB]"){
+    SECTION("Default configuration"){
+        std::string dbName="freshDB";
+        database db(Mdb::createFreshDB(dbName));
+        database dbTwo(Mdb::loadDB(dbName));
+        REQUIRE(fs::is_directory(fs::status(dbTwo.getDirectory())));
+        const auto&it=fs::directory_iterator(dbTwo.getDirectory());
+        REQUIRE(it==end(it));
+        dbTwo.destroy();
+        REQUIRE(!fs::exists(fs::status(dbTwo.getDirectory())));
     }
 }
