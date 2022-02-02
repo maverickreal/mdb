@@ -2,13 +2,12 @@
 #include "filesystem"
 #include "mdb/mdb.h"
 #include "string"
-#include "mdb/database.h"
 
 /* Healthy reminder -> https://www.geeksforgeeks.org/namespace-in-c/
  * set fs namespace to filesystem from std
 */
 
-namespace fs=std::filesystem;
+namespace fs = std::filesystem;
 
 /* TEST_CASE(s1, s2){testCaseDefinition}
  * REQUIRE() -> assert
@@ -16,8 +15,8 @@ namespace fs=std::filesystem;
  * s1 -> name of the test case, s2 -> tag for the test case
 */
 
-TEST_CASE("Create a fresh database", "[createFreshDB]"){
-    SECTION("Default configuration"){
+TEST_CASE("Create a fresh database", "[createFreshDB]") {
+    SECTION("Default configuration") {
         const std::string fp("fp"), dbName("freshDB");
         database db(Mdb::createFreshDB(dbName));
 
@@ -26,20 +25,20 @@ TEST_CASE("Create a fresh database", "[createFreshDB]"){
         */
 
         REQUIRE(fs::is_directory(fs::status(db.getDirectory())));
+        const auto& p = fs::directory_iterator(db.getDirectory());
+        REQUIRE(p == fs::end(p));
         db.destroy();
-        const auto&p=fs::directory_iterator(db.getDirectory());
-        REQUIRE(p==fs::end(p));
     }
 }
 
-TEST_CASE("lOAD A DATABASE", "[loadDB]"){
-    SECTION("Default configuration"){
-        std::string dbName="freshDB";
+TEST_CASE("lOAD A DATABASE", "[loadDB]") {
+    SECTION("Default configuration") {
+        std::string dbName = "freshDB";
         database db(Mdb::createFreshDB(dbName));
         database dbTwo(Mdb::loadDB(dbName));
         REQUIRE(fs::is_directory(fs::status(dbTwo.getDirectory())));
-        const auto&it=fs::directory_iterator(dbTwo.getDirectory());
-        REQUIRE(it==end(it));
+        const auto& it = fs::directory_iterator(dbTwo.getDirectory());
+        REQUIRE(it == end(it));
         dbTwo.destroy();
         REQUIRE(!fs::exists(fs::status(dbTwo.getDirectory())));
     }
