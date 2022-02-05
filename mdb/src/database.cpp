@@ -6,10 +6,52 @@
 
 namespace fs = std::filesystem;
 
-database::database(const std::string& dbName, const std::string& fullPath) : memberName(dbName), memberFullPath(fullPath)
-{
-    std::cout << "\n___" << dbName << '\t' << fullPath << "___\n";
-}
+class databaseEmbedded : public Idatabase{
+public:
+    databaseEmbedded(const std::string&dbName, const std::string&fullPath);
+
+    virtual ~databaseEmbedded()=0;
+
+    virtual bool destroy()=0;
+
+    virtual void setKeyValue(const std::string& key, const std::string& value)=0;
+
+    virtual std::string getKeyValue(const std::string& key)=0;
+
+    static Idatabase& createEmpty(const std::string& dbName);
+
+    static Idatabase& load(const std::string& dbName);
+
+    virtual std::string getDirectory(void)=0;
+private:
+    class impl;
+    // Healthy reminder -> https://www.cplusplus.com/reference/memory/unique_ptr/
+    std::unique_ptr<impl>memberImpl;
+};
+
+class databaseEmbedded :: impl : public Idatabase{
+//public:
+    impl(const std::string&dbName, const std::string&fullPath);
+
+    virtual ~impl()=0;
+
+    virtual bool destroy()=0;
+
+    virtual void setKeyValue(const std::string& key, const std::string& value)=0;
+
+    virtual std::string getKeyValue(const std::string& key)=0;
+
+    static Idatabase& createEmpty(const std::string& dbName);
+
+    static Idatabase& load(const std::string& dbName);
+
+    virtual std::string getDirectory(void)=0;
+
+private:
+    std::string memberName, memberFullPath;
+};
+
+databaseEmbedded :: impl :: impl(const std::string&dbName, const std::string&fullPath) : memberName(dbName), memberFullPath(fullPath){;}
 
 /* Healthy reminder -> https://www.cplusplus.com/reference/fstream/ofstream/
  * https://www.cplusplus.com/reference/fstream/ios/
@@ -18,7 +60,13 @@ database::database(const std::string& dbName, const std::string& fullPath) : mem
  * ios::trunc similar to out, but strictly replaces the entire content
  * | (bitwise OR) for flags
 */
-void database::setKeyValue(const std::string& key, const std::string& value) {
+
+databaseEmbedded::databaseEmbedded(const std::string& dbName, const std::string& fullPath) : memberImpl(std::make_unique<databaseEmbedded::impl>(dbName, fullPath))
+{
+    std::cout << "\n___" << dbName << '\t' << fullPath << "___\n";
+}
+
+void databaseEmbedded::impl::setKeyValue(const std::string& key, const std::string& value) {
     std::ofstream ofs(memberFullPath + "/" + key + "-string.kv", std::ios::out | std::ios::trunc);
     //performs the write operation
     ofs << value;
@@ -35,7 +83,7 @@ void database::setKeyValue(const std::string& key, const std::string& value) {
  * A stream is a source or sink of data, usually individual bytes or characters.
  * ios and istreambuf_iterator operate upon stream and buffer resp.
 */
-std::string database::getKeyValue(const std::string& key) {
+std::string databaseEmbedded::impl::getKeyValue(const std::string& key) {
     std::ifstream ifs(memberFullPath + "/" + key + "-string.kv");
     std::string value;
     ifs.seekg(0, std::ios::end);
@@ -45,28 +93,30 @@ std::string database::getKeyValue(const std::string& key) {
     return value;
 }
 
-database database::createEmpty(const std::string& dbName) {
+Idatabase& databaseEmbedded::impl::createEmpty(const std::string& dbName) {
     const std::string baseDir = ".mdb";
     if (!fs::exists(baseDir))
         fs::create_directory(baseDir);
     const std::string dbDir = baseDir + "/" + dbName;
     if (!fs::exists(dbDir))
         fs::create_directory(dbDir);
-    return database(dbName, dbDir);
+    auto res=databaseEmbedded::impl(dbName, dbDir);
+    return res;
 
 }
 
-database database::load(const std::string& dbName) {
+Idatabase& databaseEmbedded::impl::load(const std::string& dbName) {
     const std::string baseDir = ".mdb",
         dbDir = baseDir + "/" + dbName;
-    return database(dbName, dbDir);
+    auto res=databaseEmbedded::impl(dbName, dbDir);
+    return res;
 }
 
-std::string database::getDirectory() {
+std::string databaseEmbedded::impl::getDirectory() {
     return memberFullPath;
 }
 
-bool database::destroy() {
+bool databaseEmbedded::impl::destroy() {
     if (fs::exists(memberFullPath)) {
         // delete the dir
         fs::remove_all(memberFullPath);
