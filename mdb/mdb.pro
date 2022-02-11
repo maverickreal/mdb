@@ -15,11 +15,10 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # forming the sources and header files
-SOURCES += src/database.cpp \
-           src/mdb.cpp
+SOURCES += src/*
 
-HEADERS += include/database.h \
-           include/mdb.h \
+HEADERS += include/* \
+           include/extensions/* \
            mdb.h
 
 INCLUDEPATH += include

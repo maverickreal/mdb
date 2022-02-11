@@ -8,10 +8,10 @@ Mdb::Mdb()
 {
 }
 
-database Mdb::createFreshDB(const std::string& dbName) {
-    return database::createEmpty(dbName);
+databaseEmbedded Mdb::createFreshDB(const std::string& dbName) {
+    return databaseEmbedded::createEmpty(dbName);
 }
 
-database Mdb::loadDB(const std::string& dbName) {
-    return database::load(dbName);
+databaseEmbedded Mdb::loadDB(const std::string& dbName) {
+    return databaseEmbedded::load(dbName);
 }

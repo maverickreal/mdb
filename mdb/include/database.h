@@ -12,18 +12,16 @@ public:
 
     virtual bool destroy()=0;
 
-    virtual void setKeyValue(const std::string& key, const std::string& value)=0;
+    virtual void setKeyValue(const std :: string& key, const std :: string& value)=0;
 
-    virtual std::string getKeyValue(const std::string& key)=0;
+    virtual std :: string getKeyValue(const std :: string& key)=0;
 
-    static Idatabase& createEmpty(const std::string& dbName);
+    static const std :: unique_ptr<Idatabase>createEmpty(const std :: string& dbName);
 
-    static Idatabase& load(const std::string& dbName);
+    static const std :: unique_ptr<Idatabase>load(const std :: string& dbName);
 
-    virtual std::string getDirectory(void)=0;// takes no args
+    virtual std :: string getDirectory(void)=0;// takes no args
 
     // An instruction to the compiler to not privately create a constructor
-private:
-    Idatabase()=delete;
 };
 #endif

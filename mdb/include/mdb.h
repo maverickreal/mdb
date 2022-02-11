@@ -7,8 +7,8 @@ class Mdb
 {
 public:
     Mdb();
-    static database createFreshDB(const std::string& dbName);
-    static database loadDB(const std::string& dbName);
+    static databaseEmbedded createFreshDB(const std::string& dbName);
+    static databaseEmbedded loadDB(const std::string& dbName);
 };
 
 #endif
