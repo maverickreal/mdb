@@ -1,7 +1,10 @@
 #ifndef extension_H
 #define extension_h
 #include "database.h"
+
+using namespace Mdb;
 namespace mdbExt{
+
     class databaseEmbedded : public Idatabase{
     public:
         databaseEmbedded(const std :: string&dbName, const std :: string&fullPath);
