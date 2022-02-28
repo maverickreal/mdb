@@ -19,7 +19,8 @@ SOURCES += src/database.cpp \
            src/mdb.cpp
 
 HEADERS += include/database.h \
-           include/mdb.h \
+            include/mdb.h \
+           include/extensions/extension.h \
            mdb.h
 
 INCLUDEPATH += include

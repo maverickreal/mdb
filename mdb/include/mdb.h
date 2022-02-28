@@ -3,12 +3,15 @@
 #include "string"
 #include "database.h"
 
-class Mdb
-{
-public:
-    Mdb();
-    static database createFreshDB(const std::string& dbName);
-    static database loadDB(const std::string& dbName);
-};
+using namespace Mdb;
+namespace mdb{
+    class Mdb
+    {
+    public:
+        Mdb();
+        static std :: unique_ptr<Idatabase> createFreshDB(const std::string& dbName);
+        static std :: unique_ptr<Idatabase> loadDB(const std::string& dbName);
+    };
+}
 
 #endif
