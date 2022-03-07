@@ -6,7 +6,7 @@
 #include "filesystem"
 #include "unordered_map"
 
-namespace fs = std :: filesystem;
+namespace fs = std::filesystem;
 using namespace mdbExt;
 
 /* Healthy reminder -> https://www.cplusplus.com/reference/fstream/ofstream/
@@ -26,144 +26,144 @@ using namespace mdbExt;
  * ios and istreambuf_iterator operate upon stream and buffer resp.
 */
 
-class databaseEmbedded :: impl : public Idatabase {
+class databaseEmbedded::impl : public Idatabase {
 public:
-  impl(const std :: string&dbName, const std :: string&fullPath);
+  impl(const std::string& dbName, const std::string& fullPath);
 
   ~impl();
 
-  std :: string getDirectory();
+  std::string getDirectory();
 
-  void setKeyValue(const std :: string&key, const std :: string&value);
+  void setKeyValue(const std::string& key, const std::string& value);
 
-  std :: string getKeyValue(const std :: string&key);
+  std::string getKeyValue(const std::string& key);
 
-  static const std :: unique_ptr<Idatabase> createEmpty(const std :: string&dbName);
+  static const std::unique_ptr<Idatabase> createEmpty(const std::string& dbName);
 
-  static const std :: unique_ptr<Idatabase> load(const std :: string&dbName);
+  static const std::unique_ptr<Idatabase> load(const std::string& dbName);
 
   bool destroy();
 
 private:
 
-  std :: string memberName;
-  std :: string memberFullPath;
-  std :: unordered_map<std::string, std::string>memberKeyValueStore;
+  std::string memberName;
+  std::string memberFullPath;
+  std::unordered_map<std::string, std::string>memberKeyValueStore;
 
 };
 
-databaseEmbedded :: impl :: impl(const std :: string&dbName, const std :: string&dbDirPath) : memberName(dbName), memberFullPath(dbDirPath){
-    std :: cout<<"\nPrinting memberFullPath\t:\t"<<memberFullPath;
-    for(const auto&it:fs::directory_iterator(getDirectory())){
-        if(it.exists() && it.is_regular_file()){
-            if(".kv"==it.path().extension()){
-                std:: string key=it.path().filename();
-                int cnt=10; // for removing "-string.kv"
-                while(!key.empty() && cnt--)
-                    key.pop_back();
-                std :: ifstream t(it.path());
-                std :: string value;
-              //  t >> value;
-              //  t.close();
-                t.seekg(0, std::ios::end);
-                value.reserve(t.tellg());
-                t.seekg(0, std::ios::beg);
-                value.assign((std::istreambuf_iterator<char>(t)),
-                             std::istreambuf_iterator<char>());
-                memberKeyValueStore[key]=value;
-            }
-        }
+databaseEmbedded::impl::impl(const std::string& dbName, const std::string& dbDirPath) : memberName(dbName), memberFullPath(dbDirPath) {
+  std::cout << "\nPrinting memberFullPath\t:\t" << memberFullPath;
+  for (const auto& it : fs::directory_iterator(getDirectory())) {
+    if (it.exists() && it.is_regular_file()) {
+      if (".kv" == it.path().extension()) {
+        std::string key = it.path().filename();
+        int cnt = 10; // for removing "-string.kv"
+        while (!key.empty() && cnt--)
+          key.pop_back();
+        std::ifstream t(it.path());
+        std::string value;
+        //  t >> value;
+        //  t.close();
+        t.seekg(0, std::ios::end);
+        value.reserve(t.tellg());
+        t.seekg(0, std::ios::beg);
+        value.assign((std::istreambuf_iterator<char>(t)),
+          std::istreambuf_iterator<char>());
+        memberKeyValueStore[key] = value;
+      }
     }
+  }
 }
 
-databaseEmbedded :: impl :: ~impl() {;}
+databaseEmbedded::impl :: ~impl() { ; }
 
-const std :: unique_ptr<Idatabase> databaseEmbedded :: impl :: createEmpty(const std :: string&dbName) {
-  const std :: string baseDir(".mdb");
+const std::unique_ptr<Idatabase> databaseEmbedded::impl::createEmpty(const std::string& dbName) {
+  const std::string baseDir(".mdb");
 
-  if (!fs :: exists(baseDir))
-      fs :: create_directory(baseDir);
+  if (!fs::exists(baseDir))
+    fs::create_directory(baseDir);
 
-  const std :: string dbDir = baseDir + "/" + dbName;
+  const std::string dbDir = baseDir + "/" + dbName;
 
-  if (!fs :: exists(dbDir))
-      fs :: create_directory(dbDir);
+  if (!fs::exists(dbDir))
+    fs::create_directory(dbDir);
 
-  return std :: make_unique<impl>(dbName, dbDir);
+  return std::make_unique<impl>(dbName, dbDir);
 }
 
-const std :: unique_ptr<Idatabase> databaseEmbedded :: impl :: load(const std :: string&dbName) {
+const std::unique_ptr<Idatabase> databaseEmbedded::impl::load(const std::string& dbName) {
 
-  std :: string baseDir(".mdb"),
-          dbDir(baseDir + "/" + dbName);
-  return std :: make_unique<databaseEmbedded :: impl>(dbName, dbDir);
+  std::string baseDir(".mdb"),
+    dbDir(baseDir + "/" + dbName);
+  return std::make_unique<databaseEmbedded::impl>(dbName, dbDir);
 
 }
 
-bool databaseEmbedded :: impl :: destroy() {
+bool databaseEmbedded::impl::destroy() {
   memberKeyValueStore.clear();
-  if (fs::exists(memberFullPath)){
-      fs::remove_all(memberFullPath);
-      return true;
+  if (fs::exists(memberFullPath)) {
+    fs::remove_all(memberFullPath);
+    return true;
   }
   return false;
 }
 
-std :: string databaseEmbedded :: impl :: getDirectory() {
+std::string databaseEmbedded::impl::getDirectory() {
   return memberFullPath;
 }
 
-void databaseEmbedded :: impl :: setKeyValue(const std :: string&key, const std :: string&value) {
+void databaseEmbedded::impl::setKeyValue(const std::string& key, const std::string& value) {
 
-  std :: ofstream ofs;
-  ofs.open(memberFullPath + "/" + key + "-string.kv", std :: ios :: out | std :: ios :: trunc);
+  std::ofstream ofs;
+  ofs.open(memberFullPath + "/" + key + "-string.kv", std::ios::out | std::ios::trunc);
   ofs << value;
   ofs.close();
-  memberKeyValueStore[key]=value;
+  memberKeyValueStore[key] = value;
 
 }
 
-std :: string databaseEmbedded :: impl :: getKeyValue(const std :: string&key) {
-    return memberKeyValueStore.find(key)==memberKeyValueStore.end()?"":memberKeyValueStore[key];
-//  std :: ifstream t(memberFullPath + "/" + key + "-string.kv");
-//  std :: string value;
-////  t >> value;
-////  t.close();
-//  t.seekg(0, std::ios::end);
-//  value.reserve(t.tellg());
-//  t.seekg(0, std::ios::beg);
-//  value.assign((std::istreambuf_iterator<char>(t)),
-//               std::istreambuf_iterator<char>());
-//  return value;
+std::string databaseEmbedded::impl::getKeyValue(const std::string& key) {
+  return memberKeyValueStore.find(key) == memberKeyValueStore.end() ? "" : memberKeyValueStore[key];
+  //  std :: ifstream t(memberFullPath + "/" + key + "-string.kv");
+  //  std :: string value;
+  ////  t >> value;
+  ////  t.close();
+  //  t.seekg(0, std::ios::end);
+  //  value.reserve(t.tellg());
+  //  t.seekg(0, std::ios::beg);
+  //  value.assign((std::istreambuf_iterator<char>(t)),
+  //               std::istreambuf_iterator<char>());
+  //  return value;
 
 }
 
-databaseEmbedded :: databaseEmbedded(const std :: string& dbName, const std :: string& fullPath) : memberImpl(std :: make_unique<databaseEmbedded :: impl>(dbName, fullPath)){
-    std :: cout << "\n___" << dbName << '\t' << fullPath << "___\n";
+databaseEmbedded::databaseEmbedded(const std::string& dbName, const std::string& fullPath) : memberImpl(std::make_unique<databaseEmbedded::impl>(dbName, fullPath)) {
+  std::cout << "\n___" << dbName << '\t' << fullPath << "___\n";
 }
 
-databaseEmbedded :: ~databaseEmbedded(){}
+databaseEmbedded :: ~databaseEmbedded() {}
 
-void databaseEmbedded :: setKeyValue(const std :: string& key, const std :: string& value) {
-    memberImpl->setKeyValue(key, value);
+void databaseEmbedded::setKeyValue(const std::string& key, const std::string& value) {
+  memberImpl->setKeyValue(key, value);
 }
 
-std :: string databaseEmbedded :: getKeyValue(const std :: string& key) {
-    return memberImpl->getKeyValue(key);
+std::string databaseEmbedded::getKeyValue(const std::string& key) {
+  return memberImpl->getKeyValue(key);
 }
 
-std :: unique_ptr<Idatabase> databaseEmbedded :: createEmpty(const std :: string& dbName) {
-    return impl :: createEmpty(dbName);
+std::unique_ptr<Idatabase> databaseEmbedded::createEmpty(const std::string& dbName) {
+  return impl::createEmpty(dbName);
 }
 
-std :: unique_ptr<Idatabase> databaseEmbedded :: load(const std :: string& dbName) {
-    return impl :: load(dbName);
+std::unique_ptr<Idatabase> databaseEmbedded::load(const std::string& dbName) {
+  return impl::load(dbName);
 }
 
-std :: string databaseEmbedded :: getDirectory() {
-    return memberImpl->getDirectory();
+std::string databaseEmbedded::getDirectory() {
+  return memberImpl->getDirectory();
 }
 
-bool databaseEmbedded :: destroy() {
-    return memberImpl->destroy();
+bool databaseEmbedded::destroy() {
+  return memberImpl->destroy();
 }

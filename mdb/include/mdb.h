@@ -4,13 +4,13 @@
 #include "database.h"
 
 using namespace Mdb;
-namespace mdb{
+namespace mdb {
     class Mdb
     {
     public:
         Mdb();
-        static std :: unique_ptr<Idatabase> createFreshDB(const std::string& dbName);
-        static std :: unique_ptr<Idatabase> loadDB(const std::string& dbName);
+        static std::unique_ptr<Idatabase> createFreshDB(const std::string& dbName);
+        static std::unique_ptr<Idatabase> loadDB(const std::string& dbName);
     };
 }
 
