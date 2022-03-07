@@ -27,7 +27,7 @@ int main(int argCnt, char* args[]) {
         }
 
         std :: string dbName = res["n"].as<std :: string>();
-        std :: unique_ptr<Idatabase> db(mdb :: Mdb :: createFreshDB(dbName));
+        std :: unique_ptr<Idatabase> db = mdb :: Mdb :: createFreshDB(dbName);
 
         return 0;
     }
@@ -55,7 +55,7 @@ int main(int argCnt, char* args[]) {
             k(res["k"].as<std :: string>()),
             v(res["v"].as<std :: string>());
 
-        std :: unique_ptr<Idatabase> db(mdb :: Mdb :: loadDB(dbName));
+        std :: unique_ptr<Idatabase> db = mdb :: Mdb :: loadDB(dbName);
         db->setKeyValue(k, v);
         return 0;
     }
@@ -75,7 +75,7 @@ int main(int argCnt, char* args[]) {
 
         std :: string dbName = res["n"].as<std :: string>(),
             key = res["k"].as<std :: string>();
-        std :: unique_ptr<Idatabase> db(mdb :: Mdb :: loadDB(dbName));
+        std :: unique_ptr<Idatabase> db = mdb :: Mdb :: loadDB(dbName);
         std :: cout << db->getKeyValue(key) << '\n';
         return 0;
     }
@@ -88,7 +88,7 @@ int main(int argCnt, char* args[]) {
         }
 
         std :: string dbName = res["n"].as<std :: string>();
-        std :: unique_ptr<Idatabase> db(mdb :: Mdb :: loadDB(dbName));
+        std :: unique_ptr<Idatabase> db = mdb :: Mdb :: loadDB(dbName);
         std :: cout << (db->destroy() ? "Destroyed" : "Failed") << '\n';
         return 0;
     }

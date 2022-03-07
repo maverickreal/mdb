@@ -4,6 +4,7 @@
 #include "iostream"
 #include "fstream"
 #include "filesystem"
+#include "unordered_map"
 
 namespace fs = std :: filesystem;
 using namespace mdbExt;
@@ -47,11 +48,32 @@ private:
 
   std :: string memberName;
   std :: string memberFullPath;
+  std :: unordered_map<std::string, std::string>memberKeyValueStore;
 
 };
 
 databaseEmbedded :: impl :: impl(const std :: string&dbName, const std :: string&dbDirPath) : memberName(dbName), memberFullPath(dbDirPath){
     std :: cout<<"\nPrinting memberFullPath\t:\t"<<memberFullPath;
+    for(const auto&it:fs::directory_iterator(getDirectory())){
+        if(it.exists() && it.is_regular_file()){
+            if(".kv"==it.path().extension()){
+                std:: string key=it.path().filename();
+                int cnt=10; // for removing "-string.kv"
+                while(!key.empty() && cnt--)
+                    key.pop_back();
+                std :: ifstream t(it.path());
+                std :: string value;
+              //  t >> value;
+              //  t.close();
+                t.seekg(0, std::ios::end);
+                value.reserve(t.tellg());
+                t.seekg(0, std::ios::beg);
+                value.assign((std::istreambuf_iterator<char>(t)),
+                             std::istreambuf_iterator<char>());
+                memberKeyValueStore[key]=value;
+            }
+        }
+    }
 }
 
 databaseEmbedded :: impl :: ~impl() {;}
@@ -79,6 +101,7 @@ const std :: unique_ptr<Idatabase> databaseEmbedded :: impl :: load(const std ::
 }
 
 bool databaseEmbedded :: impl :: destroy() {
+  memberKeyValueStore.clear();
   if (fs::exists(memberFullPath)){
       fs::remove_all(memberFullPath);
       return true;
@@ -96,15 +119,22 @@ void databaseEmbedded :: impl :: setKeyValue(const std :: string&key, const std 
   ofs.open(memberFullPath + "/" + key + "-string.kv", std :: ios :: out | std :: ios :: trunc);
   ofs << value;
   ofs.close();
+  memberKeyValueStore[key]=value;
 
 }
 
 std :: string databaseEmbedded :: impl :: getKeyValue(const std :: string&key) {
-
-  std :: ifstream t(memberFullPath + "/" + key + "-string.kv");
-  std :: string value;
-  t >> value;
-  return value;
+    return memberKeyValueStore.find(key)==memberKeyValueStore.end()?"":memberKeyValueStore[key];
+//  std :: ifstream t(memberFullPath + "/" + key + "-string.kv");
+//  std :: string value;
+////  t >> value;
+////  t.close();
+//  t.seekg(0, std::ios::end);
+//  value.reserve(t.tellg());
+//  t.seekg(0, std::ios::beg);
+//  value.assign((std::istreambuf_iterator<char>(t)),
+//               std::istreambuf_iterator<char>());
+//  return value;
 
 }
 
