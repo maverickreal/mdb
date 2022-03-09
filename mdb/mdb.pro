@@ -16,7 +16,11 @@ CONFIG -= app_bundle
 
 # forming the sources and header files
 SOURCES += src/database.cpp \
-           src/mdb.cpp
+           src/fileKeyValueStore.cpp \
+           src/mdb.cpp \
+           src/fileKeyValueStore.cpp \
+           src/memoryKeyValueStore.cpp \
+           src/memoryKeyValueStore.cpp
 
 HEADERS += include/database.h \
             include/mdb.h \
