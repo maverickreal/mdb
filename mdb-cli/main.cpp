@@ -28,7 +28,6 @@ int main(int argCnt, char* args[]) {
 
         std::string dbName = res["n"].as<std::string>();
         std::unique_ptr<Idatabase> db = mdb::Mdb::createFreshDB(dbName);
-
         return 0;
     }
 
@@ -89,7 +88,7 @@ int main(int argCnt, char* args[]) {
 
         std::string dbName = res["n"].as<std::string>();
         std::unique_ptr<Idatabase> db = mdb::Mdb::loadDB(dbName);
-        std::cout << (db->destroy() ? "Destroyed" : "Failed") << '\n';
+        db->destroy();
         return 0;
     }
 

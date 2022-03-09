@@ -10,6 +10,7 @@ namespace mdb {
     public:
         Mdb();
         static std::unique_ptr<Idatabase> createFreshDB(const std::string& dbName);
+        static std::unique_ptr<Idatabase> createFreshDB(const std::string& dbname, std::unique_ptr<keyValueStore>& keyValueStore);
         static std::unique_ptr<Idatabase> loadDB(const std::string& dbName);
     };
 }
