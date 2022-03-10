@@ -1,7 +1,6 @@
 #ifndef extension_H
 #define extension_h
 #include "database.h"
-#include "../database.h"
 #include "functional"
 using namespace Mdb;
 namespace mdbExt {
