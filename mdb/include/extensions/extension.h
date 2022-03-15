@@ -2,64 +2,82 @@
 #define extension_h
 #include "database.h"
 #include "functional"
-using namespace Mdb;
-namespace mdbExt {
+
+using namespace std;
+using namespace inc;
+
+namespace ext {
 
   class memoryKeyValueStore : public keyValueStore {
   public:
     memoryKeyValueStore();
-    memoryKeyValueStore(std::unique_ptr<keyValueStore>& toCache);
+
+    memoryKeyValueStore(unique_ptr<keyValueStore>& toCache);
+
     ~memoryKeyValueStore();
-    void setKeyValue(const std::string& key, const std::string& value);
-    std::string getKeyValue(const std::string& key);
-    void loadKeysInto(const std::function<void(std::string key, std::string value)>& callBack);
+
+    void setKeyValue(const string& key, const string& value);
+
+    string getKeyValue(const string& key);
+
+    void loadKeysInto(const function<void(string key, string value)>& callBack);
+
     void clear();
 
   private:
     class impl;
-    std::unique_ptr<impl> memberImpl;
+
+    unique_ptr<impl> memberImpl;
   };
 
   class fileKeyValueStore : public keyValueStore {
   public:
-    fileKeyValueStore(const std::string& fullpath);
+
+    fileKeyValueStore(const string& fullpath);
+
     ~fileKeyValueStore();
-    void setKeyValue(const std::string& key, const std::string& value);
-    std::string getKeyValue(const std::string& key);
-    void loadKeysInto(const std::function<void(std::string key, std::string value)>& callBack);
+
+    void setKeyValue(const string& key, const string& value);
+
+    string getKeyValue(const string& key);
+
+    void loadKeysInto(const function<void(string key, string value)>& callBack);
+
     void clear();
 
   private:
     class impl;
-    std::unique_ptr<impl> memberImpl;
+
+    unique_ptr<impl> memberImpl;
   };
 
   class databaseEmbedded : public Idatabase {
   public:
-    databaseEmbedded(const std::string& dbName, const std::string& fullPath);
+
+    databaseEmbedded(const string& dbName, const string& fullPath);
 
     ~databaseEmbedded();
 
-    databaseEmbedded(const std::string& dbname, const std::string& fullpath, std::unique_ptr<keyValueStore>& keyValueStore);
+    databaseEmbedded(const string& dbname, const string& fullpath, unique_ptr<keyValueStore>& keyValueStore);
 
-    static const std::unique_ptr<Idatabase> createEmpty(const std::string& dbname, std::unique_ptr<keyValueStore>& keyValueStore);
+    static const unique_ptr<Idatabase> createEmpty(const string& dbname, unique_ptr<keyValueStore>& keyValueStore);
 
     void destroy();
 
-    void setKeyValue(const std::string& key, const std::string& value);
+    void setKeyValue(const string& key, const string& value);
 
-    std::string getKeyValue(const std::string& key);
+    string getKeyValue(const string& key);
 
-    static std::unique_ptr<Idatabase> createEmpty(const std::string& dbName);
+    static unique_ptr<Idatabase> createEmpty(const string& dbName);
 
-    static std::unique_ptr<Idatabase> load(const std::string& dbName);
+    static unique_ptr<Idatabase> load(const string& dbName);
 
-    std::string getDirectory(void);
+    string getDirectory(void);
 
     class impl;
   private:
     // Healthy reminder -> https://www.cplusplus.com/reference/memory/unique_ptr/
-    std::unique_ptr<impl>memberImpl;
+    unique_ptr<impl>memberImpl;
   };
 }
 #endif

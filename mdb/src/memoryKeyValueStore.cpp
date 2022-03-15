@@ -1,52 +1,56 @@
 #include "extensions/extension.h"
 #include "unordered_map"
-#include"optional"
+#include "optional"
+#include "extensions/highwayhash.h"
 
-namespace mdbExt {
+using namespace inc;
+using namespace ext;
+using namespace std;
 
-  class memoryKeyValueStore::impl {
-  public:
-    impl() {}
-    impl(std::unique_ptr<keyValueStore>& toCache);
-    std::unordered_map<std::string, std::string> memberKeyValueStore;
-    std::optional<std::unique_ptr<keyValueStore>> memberCachedStore;
-  };
+class memoryKeyValueStore::impl {
+public:
 
-  // Healthy Reminder -> https://www.cplusplus.com/reference/memory/unique_ptr/release/
-  memoryKeyValueStore::impl::impl(std::unique_ptr<keyValueStore>& toCache) :memberCachedStore(toCache.release()) {}
+  impl() {}
 
-  memoryKeyValueStore::memoryKeyValueStore() :memberImpl(std::make_unique<memoryKeyValueStore::impl>()) {}
+  impl(unique_ptr<keyValueStore>& toCache);
 
-  // Healthy Reminder - > https://www.cplusplus.com/reference/memory/unique_ptr/get/
-  memoryKeyValueStore::memoryKeyValueStore(std::unique_ptr<keyValueStore>& toCache) :memberImpl(std::make_unique<memoryKeyValueStore::impl>(toCache)) {
-    memberImpl->memberCachedStore->get()->loadKeysInto([this](const std::string& key, const std::string& value) {
-      memberImpl->memberKeyValueStore[key] = value;
-      });
-  }
+  unordered_map<string, string, highwayHash> memberKeyValueStore;
 
+  optional<unique_ptr<keyValueStore>> memberCachedStore;
+};
 
-  memoryKeyValueStore::~memoryKeyValueStore() {}
+// Healthy Reminder -> https://www.cplusplus.com/reference/memory/unique_ptr/release/
+memoryKeyValueStore::impl::impl(unique_ptr<keyValueStore>& toCache) :memberCachedStore(toCache.release()) {}
 
-  void memoryKeyValueStore::setKeyValue(const std::string& key, const std::string& value) {
+memoryKeyValueStore::memoryKeyValueStore() : memberImpl(make_unique<memoryKeyValueStore::impl>()) {}
+
+// Healthy Reminder - > https://www.cplusplus.com/reference/memory/unique_ptr/get/
+memoryKeyValueStore::memoryKeyValueStore(unique_ptr<keyValueStore>& toCache) : memberImpl(make_unique<memoryKeyValueStore::impl>(toCache)) {
+  memberImpl->memberCachedStore->get()->loadKeysInto([this](const string& key, const string& value) {
     memberImpl->memberKeyValueStore[key] = value;
-    if (memberImpl->memberCachedStore)
-      memberImpl->memberCachedStore->get()->setKeyValue(key, value);
-  }
+    });
+}
 
-  std::string memoryKeyValueStore::getKeyValue(const std::string& key) {
-    const auto& v = memberImpl->memberKeyValueStore.find(key);
-    return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
-  }
+memoryKeyValueStore::~memoryKeyValueStore() {}
 
-  void memoryKeyValueStore::loadKeysInto(const std::function<void(std::string key, std::string value)>& callBack) {
-    for (const auto& element : memberImpl->memberKeyValueStore)
-      callBack(element.first, element.second);
-  }
+void memoryKeyValueStore::setKeyValue(const string& key, const string& value) {
+  memberImpl->memberKeyValueStore[key] = value;
+  if (memberImpl->memberCachedStore)
+    memberImpl->memberCachedStore->get()->setKeyValue(key, value);
+}
 
-  void memoryKeyValueStore::clear() {
-    memberImpl->memberKeyValueStore.clear();
-    if (memberImpl->memberCachedStore)
-      memberImpl->memberCachedStore->get()->clear();
-  }
+string memoryKeyValueStore::getKeyValue(const string& key) {
+  const auto& v = memberImpl->memberKeyValueStore.find(key);
+  return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
+}
 
+void memoryKeyValueStore::loadKeysInto(const function<void(string key, string value)>& callBack) {
+  for (const auto& element : memberImpl->memberKeyValueStore)
+    callBack(element.first, element.second);
+}
+
+void memoryKeyValueStore::clear() {
+  memberImpl->memberKeyValueStore.clear();
+  if (memberImpl->memberCachedStore)
+    memberImpl->memberCachedStore->get()->clear();
 }

@@ -1,112 +1,119 @@
-#include "types.h"
-#include "extensions/highwayhash.h"
-#include "algorithm"
-#include "type_traits"
-#include "typeinfo"
+#include "extensions/types.h"
 
-namespace mdbTypes {
+using namespace ext;
 
-  hashedValue::hashedValue(const bytes& data, std::size_t length, std::size_t hash) {
-    memberHasValue = true;
-    memberData = data;
-    memberLength = length;
-    memberHash = hash;
-  }
+vector<short> Date::daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
-  hashedValue::hashedValue() {
-    memberHasValue = false,
-      memberLength = 0,
-      memberHash = 0;
-  }
+bool Date::checkDateValidity(const int& day, const int& month, const int& year) {
+    if (day < 1 || day > 31)
+        return false;
+    if (month < 1 || month > 12)
+        return false;
+    if (year < 0 || year > 9999)
+        return false;
+    if (day > daysInMonth[month])
+        return false;
+    if (month == 2 && day == 29 && !(year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)))
+        return false;
+    return true;
+}
 
-  /** Copy/move constuctors and operators **/
-  hashedValue::hashedValue(const hashedValue& from) {
-    memberHasValue = from.memberHasValue;
-    memberData = from.memberData;
-    memberLength = from.memberLength;
-    memberHash = from.memberHash;
-  }
+Date::Date() {
+    time_t t = time(0);
+    tm* cur = localtime(&t);
+    day = cur->tm_year + 1900;
+    month = cur->tm_mon + 1;
+    year = cur->tm_mday;
+}
 
-  hashedValue::hashedValue(const hashedValue&& from) {
-    memberHasValue = from.memberHasValue;
-    memberData = from.memberData;
-    memberLength = from.memberLength;
-    memberHash = from.memberHash;
-    //std::cout << "hashedValue::move-ctor" << std::endl;
-  }
+Date::Date(const string& s) {
+    if (s.length() != 10)
+        throw "Invalid date string format!\n";
+    for (int i = 0;i < 10;++i) {
+        if (i == 2 || i == 5)
+            continue;
+        if (s[i] < '0' || s[i] > '9')
+            throw "Invalid date string format!\n";
+    }
+    string dayStr = s.substr(0, 2),
+        monthStr = s.substr(3, 2),
+        yearStr = s.substr(6, 4);
+    int day = stoi(dayStr),
+        month = stoi(monthStr),
+        year = stoi(yearStr);
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    this->day = day;
+    this->month = month;
+    this->year = year;
+    date = dayStr + "-" + monthStr + "-" + yearStr;
+}
 
-  hashedValue& hashedValue::operator=(const hashedValue& other) {
-    memberHasValue = other.memberHasValue;
-    memberData = other.memberData;
-    memberLength = other.memberLength;
-    memberHash = other.memberHash;
-    return *this;
-  }
+Date::Date(const int& day, const int& month, const int& year) {
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    this->day = day;
+    this->month = month;
+    this->year = year;
+    date = to_string(day) + "-" + to_string(month) + "-" + to_string(year);
+}
 
-  /** Conversion constuctors **/
-  hashedValue::hashedValue(const encodedValue& from) {
-    memberHasValue = from.hasValue();
-    memberData = from.data();
-    memberLength = from.length();
-    memberHash = from.hash();
-  }
+int Date::getDay()const {
+    return day;
+}
 
-  hashedValue::hashedValue(encodedValue&& from) {
-    memberHasValue = from.hasValue();
-    memberData = std::move(from.data());
-    memberLength = from.length();
-    memberHash = from.hash();
-  }
+int Date::getMonth()const {
+    return month;
+}
 
-  const bytes hashedValue::data() const {
-    return memberData;
-  }
+int Date::getYear()const {
+    return year;
+}
 
-  std::size_t hashedValue::length() const {
-    return memberLength;
-  }
+string Date::getDate()const {
+    return date;
+}
 
-  std::size_t hashedValue::hash() const {
-    return memberHash;
-  }
+void Date::setDay(const int& day) {
+    if (day < 1 || day>31)
+        throw "Invalid day!\n";
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    this->day = day;
+}
 
-  bool hashedValue::hasValue() const {
-    return memberHasValue;
-  }
+void Date::setMonth(const int& month) {
+    if (month < 1 || month>12)
+        throw "Invalid month!\n";
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    this->month = month;
+}
 
-  bool hashedValue::operator==(const hashedValue& other) const {
-    if (memberHash != other.memberHash)
-      return false;
-    // compare hash first as generally it will be faster most often
-    if (memberLength != other.memberLength)
-      return false;
-    // only do a data wise comparison if you must (highly, highly unlikely - requires hash collision)
-    //return 0 == std::strcmp(m_data,other.m_data);
-    return memberData == other.memberData;
-  }
+void Date::setYear(const int& year) {
+    if (year < 1 || year>9999)
+        throw "Invalid year!\n";
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    this->year = year;
+}
 
-  bool hashedValue::operator!=(const hashedValue& other) const {
-    return !(*this == other);
-  }
-
-  bool encodedValue::operator==(const encodedValue& other) const {
-    return memberHasValue == other.memberHasValue && memberType == other.memberType && memberValue == other.memberValue;
-  }
-
-  bool encodedValue::operator!=(const encodedValue& other) const {
-    return !(*this == other);
-  }
-
-  std::ostream& operator<<(std::ostream& os, const Type t) {
-    os << (int)t;
-    return os;
-  }
-
-  std::istream& operator>>(std::istream& is, Type t) {
-    int tint;
-    is >> tint;
-    t = (Type)tint;
-    return is;
-  }
-
+void Date::setDate(const string& s) {
+    if (s.length() != 10)
+        throw "Invalid date string format!\n";
+    for (int i = 0;i < 10;++i) {
+        if (i == 2 || i == 5)
+            continue;
+        if (s[i] < '0' || s[i] > '9')
+            throw "Invalid date string format!\n";
+    }
+    string dayStr = s.substr(0, 2),
+        monthStr = s.substr(3, 2),
+        yearStr = s.substr(6, 4);
+    day = stoi(dayStr);
+    month = stoi(monthStr);
+    year = stoi(yearStr);
+    if (!checkDateValidity(day, month, year))
+        throw "Invalid date!\n";
+    date = dayStr + "-" + monthStr + "-" + yearStr;
 }
