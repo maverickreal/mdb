@@ -6,26 +6,24 @@ TEMPLATE = lib
 
 # target is a static library
 CONFIG += staticlib
-
 CONFIG += c++17
-CONFIG -= app_bundle
+#CONFIG -= app_bundle
+
+DEFINES += QT_DEPRECATED_WARNINGS #new
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # forming the sources and header files
-SOURCES += src/database.cpp \
-           src/fileKeyValueStore.cpp \
-           src/mdb.cpp \
-           src/fileKeyValueStore.cpp \
-           src/memoryKeyValueStore.cpp \
-           src/memoryKeyValueStore.cpp
+SOURCES += src/test.cpp
 
 HEADERS += include/database.h \
-            include/mdb.h \
-           include/extensions/extension.h \
-           mdb.h
+           include/mdb.h \
+           include/stores.h \
+           include/highwayhash.h \
+           include/types.h \
+           include/hash.h
 
 INCLUDEPATH += include
 # Default rules for deployment.
@@ -36,7 +34,4 @@ unix {
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += Defines.pri
-
-#mdb-tests.depends=mdb
-#mdb-cli.depends=mdb
 message(In $$PWD)
