@@ -21,9 +21,11 @@ SOURCES += src/test.cpp
 HEADERS += include/database.h \
            include/mdb.h \
            include/stores.h \
-           include/highwayhash.h \
            include/types.h \
-           include/hash.h
+           include/user.h \
+           include/hash/hash.h \
+           include/hash/highwayhash.h \
+           include/hash/xxhash.h
 
 INCLUDEPATH += include
 # Default rules for deployment.

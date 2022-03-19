@@ -1,5 +1,5 @@
-#ifndef EXTENSION_H
-#define EXTENSION_H
+#ifndef STORES_H
+#define STORES_H
 
 #include "database.h"
 #include "filesystem"
@@ -7,7 +7,10 @@
 #include "fstream"
 #include "iostream"
 #include "optional"
-#include "highwayhash.h"
+#include "hash/hash.h"
+#include "unordered_map"
+
+#define endl '\n';
 
 /* Healthy reminder -> https://www.cplusplus.com/reference/filesystemtream/ofilesystemtream/
 https://www.cplusplus.com/reference/memory/unique_ptr/
@@ -30,9 +33,13 @@ ios and istreambuf_iterator operate upon stream and buffer resp.
 */
 
 using namespace std;
-using namespace inc;
+using namespace customHash;
 
 namespace inc {
+
+#define rootDir "._mdb/"
+#define userDB "._users/"
+#define internal_user "._system/"
 
   class memoryKeyValueStore : public keyValueStore {
   public:
@@ -57,6 +64,16 @@ namespace inc {
       return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
     }
 
+    bool keyExists(const string& key) {
+      return memberImpl->memberKeyValueStore.find(key) != memberImpl->memberKeyValueStore.end();
+    }
+
+    void removeKeyValue(const string& key) {
+      memberImpl->memberKeyValueStore.erase(key);
+      if (memberImpl->memberCachedStore)
+        memberImpl->memberCachedStore->get()->removeKeyValue(key);
+    }
+
     void loadKeysInto(const function<void(string key, string value)>& callBack) {
       for (const auto& element : memberImpl->memberKeyValueStore)
         callBack(element.first, element.second);
@@ -68,7 +85,6 @@ namespace inc {
         memberImpl->memberCachedStore->get()->clear();
     }
 
-
   private:
     class impl {
     public:
@@ -77,7 +93,7 @@ namespace inc {
 
       impl(unique_ptr<keyValueStore>& toCache) :memberCachedStore(toCache.release()) {}
 
-      unordered_map<string, string, highwayHash> memberKeyValueStore;
+      unordered_map<string, string, xxHash> memberKeyValueStore;
 
       optional<unique_ptr<keyValueStore>> memberCachedStore;
     };
@@ -88,9 +104,9 @@ namespace inc {
   class fileKeyValueStore : public keyValueStore {
   public:
 
-    fileKeyValueStore(const string& fullpath) : memberImpl(make_unique<fileKeyValueStore::impl>(fullpath)) {
-      if (!filesystem::exists(fullpath))
-        filesystem::create_directory(fullpath);
+    fileKeyValueStore(const string& fullPath) : memberImpl(make_unique<fileKeyValueStore::impl>(fullPath)) {
+      if (!filesystem::exists(fullPath))
+        filesystem::create_directory(fullPath);
     }
 
     ~fileKeyValueStore() {}
@@ -113,6 +129,9 @@ namespace inc {
       return value;
     }
 
+    void removeKeyValue(const string& key) {
+      filesystem::remove(memberImpl->memberFullPath + "/" + key + "-string.kv");
+    }
 
     void loadKeysInto(const function<void(string key, string value)>& callBack) {
       for (const auto& p : filesystem::directory_iterator(memberImpl->memberFullPath)) {
@@ -134,18 +153,25 @@ namespace inc {
       }
     }
 
+    bool keyExists(const string& key) {
+      return filesystem::exists(memberImpl->memberFullPath + "/" + key + "-string.kv");
+    }
+
     void clear() {
-      if (filesystem::exists(memberImpl->memberFullPath))
-        filesystem::remove_all(memberImpl->memberFullPath);
+      try {
+        if (filesystem::exists(memberImpl->memberFullPath))
+          filesystem::remove_all(memberImpl->memberFullPath);
+      }
+      catch (filesystem::filesystem_error& e) {
+        cout << "Error: " << e.what() << endl;
+      }
     }
 
   private:
     class impl {
     public:
-      impl(const string& fullpath) {
-        memberFullPath = fullpath;
-      }
       string memberFullPath;
+      impl(const string& fullPath) :memberFullPath(move(fullPath)) {}
     };
 
     unique_ptr<impl> memberImpl;
@@ -155,25 +181,29 @@ namespace inc {
   private:
     class impl : public Idatabase {
     public:
+
       impl(const string& dbName, const string& dbDirPath) : memberName(dbName), memberFullPath(dbDirPath) {
-        unique_ptr<keyValueStore> fileStore = make_unique<fileKeyValueStore>(dbDirPath),
-          memoryStore = make_unique<memoryKeyValueStore>(fileStore);
-        memberKeyValueStore = move(memoryStore);
+        unique_ptr<keyValueStore> fileStore = make_unique<fileKeyValueStore>(dbDirPath);
+        memberKeyValueStore = make_unique<memoryKeyValueStore>(fileStore);
       }
 
-      impl(const string& dbname, const string& dbDirPath, unique_ptr<keyValueStore>& keyValueStore) :memberKeyValueStore(keyValueStore.release()) {
-        memberName = dbname;
+      impl(const string& dbName, const string& dbDirPath, unique_ptr<keyValueStore>& keyValueStore) :memberKeyValueStore(keyValueStore.release()) {
+        memberName = dbName;
         memberFullPath = dbDirPath;
       }
 
       ~impl() {}
 
-      static const unique_ptr<Idatabase> createEmpty(const string& dbName) {
+      static const unique_ptr<Idatabase> createEmpty(const string& dbName, const string& userName) {
 
-        if (!filesystem::exists(".mdb"))
-          filesystem::create_directory(".mdb");
+        string path = rootDir + userName;
+        if (path.back() != '/')
+          path.push_back('/');
 
-        const string dbDir = ".mdb/" + dbName;
+        if (!filesystem::exists(path))
+          filesystem::create_directory(path);
+
+        const string dbDir = path + dbName;
 
         if (filesystem::exists(dbDir))
           throw "Database already exists!\n";
@@ -181,9 +211,9 @@ namespace inc {
         return make_unique<impl>(dbName, dbDir);
       }
 
-      static const unique_ptr<Idatabase> load(const string& dbName) {
+      static const unique_ptr<Idatabase> load(const string& dbName, const string& userName) {
 
-        string dbDir = ".mdb/" + dbName;
+        string dbDir = rootDir + userName + "/" + dbName;
         if (!filesystem::exists(dbDir))
           throw "Database not found!\n";
         return make_unique<impl>(dbName, dbDir);
@@ -206,6 +236,14 @@ namespace inc {
         return memberKeyValueStore->getKeyValue(key);
       }
 
+      bool keyExists(const string& key) {
+        return memberKeyValueStore->keyExists(key);
+      }
+
+      void removeKeyValue(const string& key) {
+        memberKeyValueStore->removeKeyValue(key);
+      }
+
     private:
       unique_ptr<keyValueStore> memberKeyValueStore;
 
@@ -216,14 +254,6 @@ namespace inc {
 
   public:
 
-    databaseEmbedded(const string& dbName, const string& fullPath) : memberImpl(make_unique<impl>(dbName, fullPath)) {
-      cout << "\n___" << dbName << '\t' << fullPath << "___\n";
-    }
-
-    databaseEmbedded(const string& dbname, const string& dbDirPath, unique_ptr<keyValueStore>& keyValueStore) : memberImpl(make_unique<impl>(dbname, dbDirPath, keyValueStore)) {}
-
-    ~databaseEmbedded() {}
-
     void setKeyValue(const string& key, const string& value) {
       memberImpl->setKeyValue(key, value);
     }
@@ -232,12 +262,20 @@ namespace inc {
       return memberImpl->getKeyValue(key);
     }
 
-    static unique_ptr<Idatabase> createEmpty(const string& dbName) {
-      return impl::createEmpty(dbName);
+    bool keyExists(const string& key) {
+      return memberImpl->keyExists(key);
     }
 
-    const static unique_ptr<Idatabase> load(const string& dbName) {
-      return impl::load(dbName);
+    void removeKeyValue(const string& key) {
+      memberImpl->removeKeyValue(key);
+    }
+
+    static unique_ptr<Idatabase> createEmpty(const string& dbName, const string& userName) {
+      return impl::createEmpty(dbName, userName);
+    }
+
+    static unique_ptr<Idatabase> load(const string& dbName, const string& userName) {
+      return impl::load(dbName, userName);
     }
 
     string getDirectory() {
