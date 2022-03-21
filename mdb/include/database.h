@@ -95,6 +95,8 @@ namespace inc {
 
     virtual void destroy() = 0;
 
+    virtual void sync() = 0;
+
     virtual void setName(const string& name) = 0;
 
     virtual void setPassword(const string& password) = 0;

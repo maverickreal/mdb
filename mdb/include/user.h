@@ -64,6 +64,10 @@ namespace inc {
                     throw "User not found!\n";
             }
 
+            void sync() {
+                memberAdmin = usersDB->getKeyValue(memberName + " " + memberPassword) == "1";
+            }
+
             void setName(const string& name) {
                 memberName = name;
             }
@@ -128,6 +132,10 @@ namespace inc {
 
         unique_ptr<Idatabase>loadDB(const string& dbName)const {
             return memberImpl->loadDB(dbName);
+        }
+
+        void sync() {
+            memberImpl->sync();
         }
 
         void setName(const string& name) {

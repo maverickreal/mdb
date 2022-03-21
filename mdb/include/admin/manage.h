@@ -21,11 +21,15 @@ namespace manage {
             catch (...) {
                 user = Mdb::createFreshUser(name, password);
             }
+            usersDB->setKeyValue(name + " " + password, "1");
+            user->sync();
         }
 
         static void removeAdmin(const string& name, const string& password) {
             try {
                 unique_ptr<IUser> user = Mdb::loadUser(name, password);
+                usersDB->setKeyValue(name + " " + password, "0");
+                user->sync();
             }
             catch (...) {
                 cout << "User does not exist.\n";
