@@ -9,6 +9,7 @@
 #include "optional"
 #include "hash/hash.h"
 #include "unordered_map"
+#include "list"
 
 #define endl '\n';
 
@@ -59,13 +60,43 @@ namespace inc {
         memberImpl->memberCachedStore->get()->setKeyValue(key, value);
     }
 
+    void setKeyValue(const Date& key, const string& value) {
+      memberImpl->memberKeyValueStore[key.getDate()] = value;
+      if (memberImpl->memberCachedStore)
+        memberImpl->memberCachedStore->get()->setKeyValue(key.getDate(), value);
+    }
+
+    void setKeyValue(const double& key, const string& value) {
+      memberImpl->memberKeyValueStore[to_string(key)] = value;
+      if (memberImpl->memberCachedStore)
+        memberImpl->memberCachedStore->get()->setKeyValue(to_string(key), value);
+    }
+
     string getKeyValue(const string& key) {
       const auto& v = memberImpl->memberKeyValueStore.find(key);
       return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
     }
 
+    string getKeyValue(const Date& key) {
+      const auto& v = memberImpl->memberKeyValueStore.find(key.getDate());
+      return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
+    }
+
+    string getKeyValue(const double& key) {
+      const auto& v = memberImpl->memberKeyValueStore.find(to_string(key));
+      return v == memberImpl->memberKeyValueStore.end() ? "" : v->second;
+    }
+
     bool keyExists(const string& key) {
       return memberImpl->memberKeyValueStore.find(key) != memberImpl->memberKeyValueStore.end();
+    }
+
+    bool keyExists(const Date& key) {
+      return memberImpl->memberKeyValueStore.find(key.getDate()) != memberImpl->memberKeyValueStore.end();
+    }
+
+    bool keyExists(const double& key) {
+      return memberImpl->memberKeyValueStore.find(to_string(key)) != memberImpl->memberKeyValueStore.end();
     }
 
     void removeKeyValue(const string& key) {
@@ -74,7 +105,19 @@ namespace inc {
         memberImpl->memberCachedStore->get()->removeKeyValue(key);
     }
 
-    void loadKeysInto(const function<void(string key, string value)>& callBack) {
+    void removeKeyValue(const Date& key) {
+      memberImpl->memberKeyValueStore.erase(key.getDate());
+      if (memberImpl->memberCachedStore)
+        memberImpl->memberCachedStore->get()->removeKeyValue(key.getDate());
+    }
+
+    void removeKeyValue(const double& key) {
+      memberImpl->memberKeyValueStore.erase(to_string(key));
+      if (memberImpl->memberCachedStore)
+        memberImpl->memberCachedStore->get()->removeKeyValue(to_string(key));
+    }
+
+    void loadKeysInto(const function<void(const string& key, const string& value)>& callBack) {
       for (const auto& element : memberImpl->memberKeyValueStore)
         callBack(element.first, element.second);
     }
@@ -133,7 +176,7 @@ namespace inc {
       filesystem::remove(memberImpl->memberFullPath + "/" + key + "-string.kv");
     }
 
-    void loadKeysInto(const function<void(string key, string value)>& callBack) {
+    void loadKeysInto(const function<void(const string& key, const string& value)>& callBack) {
       for (const auto& p : filesystem::directory_iterator(memberImpl->memberFullPath)) {
         if (p.exists() && p.is_regular_file()) {
           if (".kv" == p.path().extension()) {
@@ -228,7 +271,23 @@ namespace inc {
         return memberFullPath;
       }
 
+      list<pair<string, string>>& getKeysAndValues() {
+        list<pair<string, string>> result;
+        memberKeyValueStore->loadKeysInto([&result](const string& key, const string& value) {
+          result.push_back(make_pair(key, value));
+          });
+        return result;
+      }
+
       void setKeyValue(const string& key, const string& value) {
+        memberKeyValueStore->setKeyValue(key, value);
+      }
+
+      void setKeyValue(const Date& key, const string& value) {
+        memberKeyValueStore->setKeyValue(key, value);
+      }
+
+      void setKeyValue(const double& key, const string& value) {
         memberKeyValueStore->setKeyValue(key, value);
       }
 
@@ -236,11 +295,35 @@ namespace inc {
         return memberKeyValueStore->getKeyValue(key);
       }
 
+      string getKeyValue(const Date& key) {
+        return memberKeyValueStore->getKeyValue(key);
+      }
+
+      string getKeyValue(const double& key) {
+        return memberKeyValueStore->getKeyValue(key);
+      }
+
       bool keyExists(const string& key) {
         return memberKeyValueStore->keyExists(key);
       }
 
+      bool keyExists(const Date& key) {
+        return memberKeyValueStore->keyExists(key);
+      }
+
+      bool keyExists(const double& key) {
+        return memberKeyValueStore->keyExists(key);
+      }
+
       void removeKeyValue(const string& key) {
+        memberKeyValueStore->removeKeyValue(key);
+      }
+
+      void removeKeyValue(const Date& key) {
+        memberKeyValueStore->removeKeyValue(key);
+      }
+
+      void removeKeyValue(const double& key) {
         memberKeyValueStore->removeKeyValue(key);
       }
 
@@ -258,7 +341,23 @@ namespace inc {
       memberImpl->setKeyValue(key, value);
     }
 
+    void setKeyValue(const Date& key, const string& value) {
+      memberImpl->setKeyValue(key, value);
+    }
+
+    void setKeyValue(const double& key, const string& value) {
+      memberImpl->setKeyValue(key, value);
+    }
+
     string getKeyValue(const string& key) {
+      return memberImpl->getKeyValue(key);
+    }
+
+    string getKeyValue(const Date& key) {
+      return memberImpl->getKeyValue(key);
+    }
+
+    string getKeyValue(const double& key) {
       return memberImpl->getKeyValue(key);
     }
 
@@ -266,7 +365,23 @@ namespace inc {
       return memberImpl->keyExists(key);
     }
 
+    bool keyExists(const Date& key) {
+      return memberImpl->keyExists(key);
+    }
+
+    bool keyExists(const double& key) {
+      return memberImpl->keyExists(key);
+    }
+
     void removeKeyValue(const string& key) {
+      memberImpl->removeKeyValue(key);
+    }
+
+    void removeKeyValue(const Date& key) {
+      memberImpl->removeKeyValue(key);
+    }
+
+    void removeKeyValue(const double& key) {
       memberImpl->removeKeyValue(key);
     }
 
@@ -280,6 +395,10 @@ namespace inc {
 
     string getDirectory() {
       return memberImpl->getDirectory();
+    }
+
+    list<pair<string, string>>& getKeysAndValues() {
+      return memberImpl->getKeysAndValues();
     }
 
     void destroy() {

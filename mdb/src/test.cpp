@@ -20,6 +20,17 @@ int main() {
         user = Mdb::createFreshUser(userName, password);
         cout << "User created successfully!\n";
     }
+    cout << "Make this user admin? (y/n)\n";
+    char c;
+    cin >> c;
+    if (c == 'y') {
+        user->setAdmin(true);
+        cout << "User is now admin!\n";
+    }
+    else {
+        user->setAdmin(false);
+        cout << "User is no longer admin!\n";
+    }
     string dbname;
     cout << "Enter database name:\n";
     cin >> dbname;
@@ -33,16 +44,19 @@ int main() {
         cout << "Database loaded successfully.\n";
     }
     vector<string>v;
-    long  mx = 100000;
+    long  mx;
+    cout << "Enter the size of dataset for testing purpose:\n";
+    cin >> mx;
     for (int i = 0; i < mx; i++)
         v.push_back(to_string(i));
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    for (auto it = v.begin(); it != v.end(); it++, db->setKeyValue(*it, *it));
+    for (const string& it : v)
+        db->setKeyValue(it, it);
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << "Time taken for " << mx << " setKeyValue calls: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms\n";
     begin = std::chrono::steady_clock::now();
-    for (auto it = v.begin(); it != v.end(); it++)
-        auto x = db->getKeyValue(*it);
+    for (const string& it : v)
+        db->getKeyValue(it);
     end = std::chrono::steady_clock::now();
     std::cout << "Time taken for " << mx << " getKeyValue calls: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << " ms\n";
     cout << "Delete database? (y/n)\n";

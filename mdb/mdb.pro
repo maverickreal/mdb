@@ -25,7 +25,8 @@ HEADERS += include/database.h \
            include/user.h \
            include/hash/hash.h \
            include/hash/highwayhash.h \
-           include/hash/xxhash.h
+           include/hash/xxhash.h \
+           include/admin/manage.h
 
 INCLUDEPATH += include
 # Default rules for deployment.

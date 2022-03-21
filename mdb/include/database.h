@@ -4,6 +4,7 @@
 #include "string"
 #include "memory"
 #include "functional"
+#include "list"
 
 using namespace std;
 
@@ -18,14 +19,30 @@ namespace inc {
 
     virtual void setKeyValue(const string& key, const string& value) = 0;
 
+    virtual void setKeyValue(const Date& key, const string& value) = 0;
+
+    virtual void setKeyValue(const double& key, const string& value) = 0;
+
     virtual string getKeyValue(const string& key) = 0;
+
+    virtual string getKeyValue(const Date& key) = 0;
+
+    virtual string getKeyValue(const double& key) = 0;
 
     virtual bool keyExists(const string& key) = 0;
 
+    virtual bool keyExists(const Date& key) = 0;
+
+    virtual bool keyExists(const double& key) = 0;
+
     virtual void removeKeyValue(const string& key) = 0;
 
+    virtual void removeKeyValue(const Date& key) = 0;
+
+    virtual void removeKeyValue(const double& key) = 0;
+
     // Healthy Reminder -> https://www.geeksforgeeks.org/lambda-expression-in-c/
-    virtual void loadKeysInto(const function<void(string key, string value)>& callBack) = 0;
+    virtual void loadKeysInto(const function<void(const string& key, const string& value)>& callBack) = 0;
 
     virtual void clear() = 0;
   };
@@ -43,7 +60,15 @@ namespace inc {
 
     virtual void setKeyValue(const string& key, const string& value) = 0;
 
+    virtual void setKeyValue(const Date& key, const string& value) = 0;
+
+    virtual void setKeyValue(const double& key, const string& value) = 0;
+
     virtual string getKeyValue(const string& key) = 0;
+
+    virtual string getKeyValue(const Date& key) = 0;
+
+    virtual string getKeyValue(const double& key) = 0;
 
     virtual bool keyExists(const string& key) = 0;
 
@@ -54,6 +79,8 @@ namespace inc {
     static const unique_ptr<Idatabase>load(const string& dbName);
 
     virtual string getDirectory(void) = 0;// takes no args
+
+    virtual list<pair<string, string>>& getKeysAndValues() = 0;
   };
 
   class IUser {
@@ -70,19 +97,7 @@ namespace inc {
 
     virtual void setName(const string& name) = 0;
 
-    virtual string getName()const = 0;
-
     virtual void setPassword(const string& password) = 0;
-
-    virtual string getPassword()const = 0;
-
-    virtual void setAdmin(bool admin) = 0;
-
-    virtual bool isAdmin()const = 0;
-
-    virtual string getId()const = 0;
-
-    virtual void setId(const string& id) = 0;
   };
 }
 #endif

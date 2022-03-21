@@ -10,15 +10,18 @@
 
 using namespace std;
 using namespace customHash;
+using namespace manage;
 
 namespace inc {
 
-    unique_ptr<Idatabase>usersDB;
+    static unique_ptr<Idatabase>usersDB;
 
     class User :public IUser {
     private:
+
         class impl :public IUser {
         private:
+
             string memberName,
                 memberPassword,
                 memberId;
@@ -27,7 +30,7 @@ namespace inc {
 
         public:
 
-            impl(const string& name, const string& password, bool admin) :memberName(name), memberPassword(password), memberAdmin(admin) {
+            impl(const string& name, const string& password) :memberName(name), memberPassword(password) {
                 string tmp = memberName + " " + memberPassword;
                 const xxHash xxh;
                 tmp = to_string(xxh(tmp));
@@ -50,79 +53,72 @@ namespace inc {
                 return databaseEmbedded::load(tmp, memberId);
             }
 
-            static unique_ptr<IUser> createEmpty(const string& name, const string& password, bool admin) {
-                if (!usersDB) {
-                    if (!filesystem::exists(rootDir))
-                        filesystem::create_directory(rootDir);
-                    try {
-                        usersDB = databaseEmbedded::load(userDB, internal_user);
-                    }
-                    catch (...) {
-                        cout << "Creating\n";
-                        usersDB = databaseEmbedded::createEmpty(userDB, internal_user);
-                    }
-                }
+            static void create(const string& name, const string& password) {
                 if (usersDB->keyExists(name + " " + password))
                     throw "User already exists!\n";
-                usersDB->setKeyValue(name + " " + password, admin ? "1" : "0");
-                return make_unique<impl>(name, password, admin);
+                usersDB->setKeyValue(name + " " + password, "0");
             }
 
-            static unique_ptr<IUser> load(const string& name, const string& password) {
-                if (!usersDB) {
-                    try {
-                        usersDB = databaseEmbedded::createEmpty(rootDir, userDB);
-                    }
-                    catch (...) {
-                        usersDB = databaseEmbedded::load(rootDir, userDB);
-                    }
-                }
+            static void load(const string& name, const string& password) {
                 if (!usersDB->keyExists(name + " " + password))
                     throw "User not found!\n";
-                return make_unique<impl>(name, password, usersDB->getKeyValue(name + " " + password) == "1");
-            }
-
-            string getId() const {
-                return memberId;
-            }
-
-            string getName() const {
-                return memberName;
-            }
-
-            string getPassword() const {
-                return memberPassword;
-            }
-
-            bool isAdmin() const {
-                return memberAdmin;
-            }
-
-            void setId(const string& id) {
-                memberId = id;
             }
 
             void setName(const string& name) {
                 memberName = name;
             }
 
-            void setPassword(const string& password) {
+            void setPassword(const string& oldPassword, const string& password) {
+                if (oldPassword != memberPassword)
+                    throw "Wrong password!\n";
                 memberPassword = password;
-            }
-
-            void setAdmin(bool admin) {
-                memberAdmin = admin;
             }
 
             void destroy() {
                 usersDB->removeKeyValue(memberId);
+                delete this;
             }
         };
-
         unique_ptr<impl> memberImpl;
 
     public:
-        User() {}
+        User(const string& name, const string& password, const bool& load) {
+            if (!usersDB) {
+
+                if (!filesystem::exists(rootDir))
+                    filesystem::create_directory(rootDir);
+
+                try {
+                    usersDB = databaseEmbedded::load(userDB, internal_user);
+                }
+
+                catch (...) {
+                    cout << "Creating\n";
+                    usersDB = databaseEmbedded::createEmpty(userDB, internal_user);
+                }
+
+            }
+
+            if (!load && usersDB->keyExists(name + " " + password)) {
+                delete this;
+                throw "User already exists!\n";
+            }
+
+            if (load && !usersDB->keyExists(name + " " + password)) {
+                delete this;
+                throw "User does not exist!\n";
+            }
+
+            memberImpl = make_unique<impl>(name, password);
+
+            try {
+                impl::create(name, password);
+            }
+
+            catch (...) {
+                impl::load(name, password);
+            }
+        }
 
         ~User() {}
 
@@ -134,48 +130,17 @@ namespace inc {
             return memberImpl->loadDB(dbName);
         }
 
-        static unique_ptr<IUser> load(const string& name, const string& password) {
-            return impl::load(name, password);
-        }
-
-        static unique_ptr<IUser> createEmpty(const string& name, const string& password, bool admin) {
-            return impl::createEmpty(name, password, admin);
-        }
-
         void setName(const string& name) {
             memberImpl->setName(name);
         }
 
-        void setPassword(const string& password) {
-            return memberImpl->setPassword(password);
-        }
-
-        void setAdmin(bool admin) {
-            memberImpl->setAdmin(admin);
-        }
-
-        string getName()const {
-            return memberImpl->getName();
-        }
-
-        string getPassword()const {
-            return memberImpl->getPassword();
-        }
-
-        bool isAdmin()const {
-            return memberImpl->isAdmin();
-        }
-
-        string getId()const {
-            return memberImpl->getId();
-        }
-
-        void setId(const string& id) {
-            memberImpl->setId(id);
+        void setPassword(const string& oldPassword, const string& password) {
+            return memberImpl->setPassword(oldPassword, password);
         }
 
         void destroy() {
             memberImpl->destroy();
+            delete this;
         }
     };
 }
