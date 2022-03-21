@@ -2,18 +2,24 @@
 #define MDB_H
 
 #include "string"
-#include "database.h"
+#include "stores.h"
+#include "user.h"
+
+using namespace std;
 
 namespace inc {
-    class Mdb
-    {
+    class Mdb {
     public:
+        /* Healthy reminders: https://www.educative.io/edpresso/what-is-the-using-keyword-in-cpp
+        https://www.geeksforgeeks.org/scope-resolution-operator-in-c
+        */
+        static unique_ptr<IUser> createFreshUser(const string& name, const string& password, bool admin = false) {
+            return User::createEmpty(name, password, admin);
+        }
 
-        static std::unique_ptr<Idatabase> createFreshDB(const std::string& dbName);
-
-        static std::unique_ptr<Idatabase> createFreshDB(const std::string& dbname, std::unique_ptr<keyValueStore>& keyValueStore);
-
-        static std::unique_ptr<Idatabase> loadDB(const std::string& dbName);
+        static unique_ptr<IUser> loadUser(const string& name, const string& password) {
+            return User::load(name, password);
+        }
     };
 }
 #endif

@@ -9,15 +9,7 @@ using namespace std;
 
 namespace inc {
 
-  class store {
-  public:
-
-    store() = default;
-
-    virtual ~store() = default;
-  };
-
-  class keyValueStore : public store {
+  class keyValueStore {
   public:
 
     keyValueStore() = default;
@@ -28,8 +20,11 @@ namespace inc {
 
     virtual string getKeyValue(const string& key) = 0;
 
-    // Healthy Reminder -> https://www.geeksforgeeks.org/lambda-expression-in-c/
+    virtual bool keyExists(const string& key) = 0;
 
+    virtual void removeKeyValue(const string& key) = 0;
+
+    // Healthy Reminder -> https://www.geeksforgeeks.org/lambda-expression-in-c/
     virtual void loadKeysInto(const function<void(string key, string value)>& callBack) = 0;
 
     virtual void clear() = 0;
@@ -50,14 +45,44 @@ namespace inc {
 
     virtual string getKeyValue(const string& key) = 0;
 
-    static const unique_ptr<Idatabase>createEmpty(const string& dbName);
+    virtual bool keyExists(const string& key) = 0;
 
-    static const unique_ptr<Idatabase> createEmpty(const string& dbname, unique_ptr<keyValueStore>& keyValueStore);
+    virtual void removeKeyValue(const string& key) = 0;
+
+    static const unique_ptr<Idatabase>createEmpty(const string& dbName);
 
     static const unique_ptr<Idatabase>load(const string& dbName);
 
     virtual string getDirectory(void) = 0;// takes no args
   };
 
+  class IUser {
+  public:
+    IUser() = default;
+
+    virtual ~IUser() = default;
+
+    virtual unique_ptr<Idatabase>createFreshDB(const string& dbName)const = 0;
+
+    virtual unique_ptr<Idatabase>loadDB(const string& dbName)const = 0;
+
+    virtual void destroy() = 0;
+
+    virtual void setName(const string& name) = 0;
+
+    virtual string getName()const = 0;
+
+    virtual void setPassword(const string& password) = 0;
+
+    virtual string getPassword()const = 0;
+
+    virtual void setAdmin(bool admin) = 0;
+
+    virtual bool isAdmin()const = 0;
+
+    virtual string getId()const = 0;
+
+    virtual void setId(const string& id) = 0;
+  };
 }
 #endif

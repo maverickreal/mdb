@@ -3,10 +3,8 @@ TEMPLATE = subdirs
 
 # Since it's a subdirs proj, the subdirs
 SUBDIRS += mdb \
-    mdb-cli \
-    mdb-tests
+    mdb-cli
 
-mdb-tests.depends=mdb
 mdb-cli.depends=mdb
 
 CONFIG += console c++17
