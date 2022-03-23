@@ -1,7 +1,7 @@
 #include "cxxopts.h"
 #include "../mdb/include/mdb.h"
 
-using namespace inc;
+using namespace mdb;
 using namespace std;
 
 cxxopts::Options opts("mdb-cli", "CLI for MaverickDB");
@@ -30,7 +30,7 @@ int main(int argCnt, char* args[]) {
         }
 
         string dbName = res["n"].as<string>();
-        Mdb::createFreshDB(dbName);
+        createFreshDB(dbName);
         return 0;
     }
 
@@ -57,7 +57,7 @@ int main(int argCnt, char* args[]) {
             k(res["k"].as<string>()),
             v(res["v"].as<string>());
 
-        Mdb::loadDB(dbName)->setKeyValue(k, v);
+        loadDB(dbName)->setKeyValue(k, v);
         return 0;
     }
 
@@ -76,7 +76,7 @@ int main(int argCnt, char* args[]) {
 
         string dbName = res["n"].as<string>(),
             key = res["k"].as<string>();
-        cout << Mdb::loadDB(dbName)->getKeyValue(key) << '\n';
+        cout << loadDB(dbName)->getKeyValue(key) << '\n';
         return 0;
     }
 
@@ -88,7 +88,7 @@ int main(int argCnt, char* args[]) {
         }
 
         string dbName = res["n"].as<string>();
-        Mdb::loadDB(dbName)->destroy();
+        loadDB(dbName)->destroy();
         return 0;
     }
 

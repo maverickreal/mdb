@@ -1,5 +1,3 @@
-#ifndef XXHASH_H
-#define XXHASH_H
 // see http://create.stephan-brumme.com/disclaimer.html
 
 #pragma once
@@ -19,7 +17,6 @@
 
     Note: my code is NOT endian-aware !
 **/
-namespace customHash{
 class XXHash64
 {
 public:
@@ -199,5 +196,3 @@ private:
         state3 = processSingle(state3, block[3]);
     }
 };
-}
-#endif

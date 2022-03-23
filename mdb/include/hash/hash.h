@@ -6,9 +6,8 @@
 #include "highwayhash.h"
 
 using namespace std;
-using namespace inc;
 
-namespace customHash {
+namespace hashes {
     class highwayHash {
     public:
 

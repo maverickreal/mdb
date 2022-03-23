@@ -6,8 +6,7 @@
 
 using namespace std;
 
-namespace inc {
-
+namespace types {
     class Date {
     private:
         int day, month, year;

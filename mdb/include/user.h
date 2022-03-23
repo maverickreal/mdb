@@ -3,23 +3,26 @@
 
 #include "string"
 #include "unordered_map"
-#include "time.h"
-#include "mdb.h"
 #include "unordered_set"
+#include "queue"
+#include "filesystem"
 #include "stores.h"
+#include "database.h"
 
 using namespace std;
-using namespace customHash;
-using namespace manage;
+using namespace stores;
+using namespace database;
 
-namespace inc {
+static long long maxID = -1;
 
-    static unique_ptr<Idatabase>usersDB;
+namespace user {
 
-    class User :public IUser {
+    priority_queue<long long>idQueue;
+    unique_ptr<Idatabase>usersDB;
+
+    class User : public IUser {
     private:
-
-        class impl :public IUser {
+        class impl : public IUser {
         private:
 
             string memberName,
@@ -31,26 +34,25 @@ namespace inc {
         public:
 
             impl(const string& name, const string& password) :memberName(name), memberPassword(password) {
-                string tmp = memberName + " " + memberPassword;
-                const xxHash xxh;
-                tmp = to_string(xxh(tmp));
-                memberId = tmp;
+                long long newId;
+                if (idQueue.empty()) {
+                    newId = ++maxID;
+                }
+                else {
+                    newId = idQueue.top();
+                    idQueue.pop();
+                }
+                memberId = Crypt::encrypt(name + " " + password + " " + to_string(newId));
             }
 
             ~impl() {}
 
             unique_ptr<Idatabase> createFreshDB(const string& dbName)const {
-                string tmp = dbName;
-                const xxHash xxh;
-                tmp = to_string(xxh(tmp));
-                return databaseEmbedded::createEmpty(tmp, memberId);
+                return databaseEmbedded::createEmpty(dbName, memberName + " " + memberPassword);
             }
 
             unique_ptr<Idatabase> loadDB(const string& dbName)const {
-                string tmp = dbName;
-                const xxHash xxh;
-                tmp = to_string(xxh(tmp));
-                return databaseEmbedded::load(tmp, memberId);
+                return databaseEmbedded::load(dbName, memberName + " " + memberPassword);
             }
 
             static void create(const string& name, const string& password) {
@@ -64,8 +66,9 @@ namespace inc {
                     throw "User not found!\n";
             }
 
+            // Refreshes the memory store with respect to the file store.
             void sync() {
-                memberAdmin = usersDB->getKeyValue(memberName + " " + memberPassword) == "1";
+                memberAdmin = (usersDB->getKeyValue(memberName + " " + memberPassword) == "1");
             }
 
             void setName(const string& name) {
@@ -80,7 +83,6 @@ namespace inc {
 
             void destroy() {
                 usersDB->removeKeyValue(memberId);
-                delete this;
             }
         };
         unique_ptr<impl> memberImpl;
@@ -97,31 +99,20 @@ namespace inc {
                 }
 
                 catch (...) {
-                    cout << "Creating\n";
                     usersDB = databaseEmbedded::createEmpty(userDB, internal_user);
                 }
-
             }
-
-            if (!load && usersDB->keyExists(name + " " + password)) {
-                delete this;
+            if (!load && usersDB->keyExists(name + " " + password))
                 throw "User already exists!\n";
-            }
 
-            if (load && !usersDB->keyExists(name + " " + password)) {
-                delete this;
+            if (load && !usersDB->keyExists(name + " " + password))
                 throw "User does not exist!\n";
-            }
-
             memberImpl = make_unique<impl>(name, password);
 
-            try {
-                impl::create(name, password);
-            }
-
-            catch (...) {
+            if (load)
                 impl::load(name, password);
-            }
+            else
+                impl::create(name, password);
         }
 
         ~User() {}
@@ -148,7 +139,6 @@ namespace inc {
 
         void destroy() {
             memberImpl->destroy();
-            delete this;
         }
     };
 }

@@ -1,17 +1,21 @@
 #ifndef STORES_H
 #define STORES_H
 
-#include "database.h"
 #include "filesystem"
 #include "functional"
 #include "fstream"
 #include "iostream"
 #include "optional"
-#include "hash/hash.h"
 #include "unordered_map"
 #include "list"
+#include "crypt/crypt.h"
+#include "database.h"
+#include "hash/hash.h"
 
 #define endl '\n';
+#define rootDir "._mdb/"
+#define userDB "._users/"
+#define internal_user "._system/"
 
 /* Healthy reminder -> https://www.cplusplus.com/reference/filesystemtream/ofilesystemtream/
 https://www.cplusplus.com/reference/memory/unique_ptr/
@@ -34,13 +38,11 @@ ios and istreambuf_iterator operate upon stream and buffer resp.
 */
 
 using namespace std;
-using namespace customHash;
+using namespace crypt;
+using namespace hashes;
+using namespace database;
 
-namespace inc {
-
-#define rootDir "._mdb/"
-#define userDB "._users/"
-#define internal_user "._system/"
+namespace stores {
 
   class memoryKeyValueStore : public keyValueStore {
   public:
@@ -48,7 +50,7 @@ namespace inc {
 
     memoryKeyValueStore(unique_ptr<keyValueStore>& toCache) : memberImpl(make_unique<memoryKeyValueStore::impl>(toCache)) {
       memberImpl->memberCachedStore->get()->loadKeysInto([this](const string& key, const string& value) {
-        memberImpl->memberKeyValueStore[key] = value;
+        memberImpl->memberKeyValueStore[Crypt::decrypt(key)] = Crypt::decrypt(value);
         });
     }
 
@@ -63,13 +65,13 @@ namespace inc {
     void setKeyValue(const Date& key, const string& value) {
       memberImpl->memberKeyValueStore[key.getDate()] = value;
       if (memberImpl->memberCachedStore)
-        memberImpl->memberCachedStore->get()->setKeyValue(key.getDate(), value);
+        memberImpl->memberCachedStore->get()->setKeyValue(key, value);
     }
 
     void setKeyValue(const double& key, const string& value) {
       memberImpl->memberKeyValueStore[to_string(key)] = value;
       if (memberImpl->memberCachedStore)
-        memberImpl->memberCachedStore->get()->setKeyValue(to_string(key), value);
+        memberImpl->memberCachedStore->get()->setKeyValue(key, value);
     }
 
     string getKeyValue(const string& key) {
@@ -108,13 +110,13 @@ namespace inc {
     void removeKeyValue(const Date& key) {
       memberImpl->memberKeyValueStore.erase(key.getDate());
       if (memberImpl->memberCachedStore)
-        memberImpl->memberCachedStore->get()->removeKeyValue(key.getDate());
+        memberImpl->memberCachedStore->get()->removeKeyValue(key);
     }
 
     void removeKeyValue(const double& key) {
       memberImpl->memberKeyValueStore.erase(to_string(key));
       if (memberImpl->memberCachedStore)
-        memberImpl->memberCachedStore->get()->removeKeyValue(to_string(key));
+        memberImpl->memberCachedStore->get()->removeKeyValue(key);
     }
 
     void loadKeysInto(const function<void(const string& key, const string& value)>& callBack) {
@@ -156,48 +158,101 @@ namespace inc {
 
     void setKeyValue(const string& key, const string& value) {
       ofstream os;
-      os.open(memberImpl->memberFullPath + "/" + key + "-string.kv", ios::out | ios::trunc);
+      os.open(memberImpl->memberFullPath + "/" + Crypt::encrypt(key) + "-string.kv", ios::out | ios::trunc);
+      os << value;
+      os.close();
+    }
+
+    void setKeyValue(const Date& key, const string& value) {
+      ofstream os;
+      os.open(memberImpl->memberFullPath + "/" + Crypt::encrypt(key.getDate()) + "-date.kv", ios::out | ios::trunc);
+      os << value;
+      os.close();
+    }
+
+    void setKeyValue(const double& key, const string& value) {
+      ofstream os;
+      os.open(memberImpl->memberFullPath + "/" + Crypt::encrypt(to_string(key)) + "-double.kv", ios::out | ios::trunc);
       os << value;
       os.close();
     }
 
     string getKeyValue(const string& key) {
-      ifstream t(memberImpl->memberFullPath + "/" + key + "-string.kv");
+      /* ifstream t(memberImpl->memberFullPath + "/" + key + "-string.kv");
       string value;
       t.seekg(0, ios::end);
       value.reserve(t.tellg());
       t.seekg(0, ios::beg);
       value.assign((istreambuf_iterator<char>(t)),
         istreambuf_iterator<char>());
-      return value;
+      return value; */
+      return "";
+    }
+
+    string getKeyValue(const Date& key) {
+      /* ifstream t(memberImpl->memberFullPath + "/" + key.getDate() + "-string.kv");
+      string value;
+      t.seekg(0, ios::end);
+      value.reserve(t.tellg());
+      t.seekg(0, ios::beg);
+      value.assign((istreambuf_iterator<char>(t)),
+        istreambuf_iterator<char>());
+      return value; */
+      return "";
+    }
+
+    string getKeyValue(const double& key) {
+      /* ifstream t(memberImpl->memberFullPath + "/" + to_string(key) + "-string.kv");
+      string value;
+      t.seekg(0, ios::end);
+      value.reserve(t.tellg());
+      t.seekg(0, ios::beg);
+      value.assign((istreambuf_iterator<char>(t)),
+        istreambuf_iterator<char>());
+      return value; */
+      return "";
     }
 
     void removeKeyValue(const string& key) {
-      filesystem::remove(memberImpl->memberFullPath + "/" + key + "-string.kv");
+      filesystem::remove(memberImpl->memberFullPath + "/" + Crypt::encrypt(key) + "-string.kv");
+    }
+
+    void removeKeyValue(const Date& key) {
+      filesystem::remove(memberImpl->memberFullPath + "/" + Crypt::encrypt(key.getDate()) + "-string.kv");
+    }
+
+    void removeKeyValue(const double& key) {
+      filesystem::remove(memberImpl->memberFullPath + "/" + Crypt::encrypt(to_string(key)) + "-string.kv");
     }
 
     void loadKeysInto(const function<void(const string& key, const string& value)>& callBack) {
       for (const auto& p : filesystem::directory_iterator(memberImpl->memberFullPath)) {
-        if (p.exists() && p.is_regular_file()) {
-          if (".kv" == p.path().extension()) {
-            string key = p.path().filename();
-            int cnt = 10;
-            while (cnt-- && !key.empty())
-              key.pop_back();
-            ifstream t(p.path());
-            string value;
-            t.seekg(0, ios::end);
-            value.reserve(t.tellg());
-            t.seekg(0, ios::beg);
-            value.assign((istreambuf_iterator<char>(t)), istreambuf_iterator<char>());
-            callBack(key, value);
-          }
+        if (p.exists() && p.is_regular_file() && ".kv" == p.path().extension()) {
+          string key = p.path().filename();
+          int cnt = 10;
+          while (cnt-- && !key.empty())
+            key.pop_back();
+          ifstream t(p.path());
+          string value;
+          t.seekg(0, ios::end);
+          value.reserve(t.tellg());
+          t.seekg(0, ios::beg);
+          value.assign((istreambuf_iterator<char>(t)), istreambuf_iterator<char>());
+          callBack(key, value);
         }
       }
     }
 
     bool keyExists(const string& key) {
-      return filesystem::exists(memberImpl->memberFullPath + "/" + key + "-string.kv");
+      return false;
+    }
+
+    bool keyExists(const Date& key) {
+      return false;
+    }
+
+    bool keyExists(const double& key) {
+      return false;
     }
 
     void clear() {
@@ -237,16 +292,16 @@ namespace inc {
 
       ~impl() {}
 
-      static const unique_ptr<Idatabase> createEmpty(const string& dbName, const string& userName) {
+      static const unique_ptr<Idatabase> createEmpty(const string& dbName, string userName) {
+        if (userName.back() == '/')
+          userName.pop_back();
 
-        string path = rootDir + userName;
-        if (path.back() != '/')
-          path.push_back('/');
+        string path = rootDir + Crypt::encrypt(userName) + "/";
 
         if (!filesystem::exists(path))
           filesystem::create_directory(path);
 
-        const string dbDir = path + dbName;
+        const string dbDir = path + Crypt::encrypt(dbName);
 
         if (filesystem::exists(dbDir))
           throw "Database already exists!\n";
@@ -256,7 +311,8 @@ namespace inc {
 
       static const unique_ptr<Idatabase> load(const string& dbName, const string& userName) {
 
-        string dbDir = rootDir + userName + "/" + dbName;
+        string dbDir = rootDir + Crypt::encrypt(userName) + "/" + Crypt::encrypt(dbName);
+        cout << "dbDir: " << dbDir << endl;
         if (!filesystem::exists(dbDir))
           throw "Database not found!\n";
         return make_unique<impl>(dbName, dbDir);
@@ -271,10 +327,10 @@ namespace inc {
         return memberFullPath;
       }
 
-      list<pair<string, string>>& getKeysAndValues() {
+      list<pair<string, string>> getKeysAndValues() {
         list<pair<string, string>> result;
         memberKeyValueStore->loadKeysInto([&result](const string& key, const string& value) {
-          result.push_back(make_pair(key, value));
+          result.push_back({ key, value });
           });
         return result;
       }
@@ -397,7 +453,7 @@ namespace inc {
       return memberImpl->getDirectory();
     }
 
-    list<pair<string, string>>& getKeysAndValues() {
+    list<pair<string, string>> getKeysAndValues() {
       return memberImpl->getKeysAndValues();
     }
 

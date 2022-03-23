@@ -1,12 +1,7 @@
-#ifndef HIGHWAYHASH_H
-#define HIGHWAYHASH_H
-
 #include "string"
 #include "../types.h"
 
 using namespace std;
-
-namespace customHash{
 
 static const uint64_t key[4] = { 1,2,3,4 };
 
@@ -155,5 +150,3 @@ static void ProcessAll(const uint8_t* data, size_t size, HighwayHashState* state
     }
     if ((size & 31) != 0) HighwayHashUpdateRemainder(data + i, size & 31, state);
 }
-}
-#endif

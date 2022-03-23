@@ -2,13 +2,14 @@
 #define DATABASE_H
 
 #include "string"
-#include "memory"
 #include "functional"
 #include "list"
+#include "types.h"
 
 using namespace std;
+using namespace types;
 
-namespace inc {
+namespace database {
 
   class keyValueStore {
   public:
@@ -72,6 +73,10 @@ namespace inc {
 
     virtual bool keyExists(const string& key) = 0;
 
+    virtual bool keyExists(const Date& key) = 0;
+
+    virtual bool keyExists(const double& key) = 0;
+
     virtual void removeKeyValue(const string& key) = 0;
 
     static const unique_ptr<Idatabase>createEmpty(const string& dbName);
@@ -80,7 +85,7 @@ namespace inc {
 
     virtual string getDirectory(void) = 0;// takes no args
 
-    virtual list<pair<string, string>>& getKeysAndValues() = 0;
+    virtual list<pair<string, string>> getKeysAndValues() = 0;
   };
 
   class IUser {
@@ -99,7 +104,7 @@ namespace inc {
 
     virtual void setName(const string& name) = 0;
 
-    virtual void setPassword(const string& password) = 0;
+    virtual void setPassword(const string& oldPassword, const string& password) = 0;
   };
 }
 #endif
