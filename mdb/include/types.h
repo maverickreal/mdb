@@ -7,11 +7,12 @@
 using namespace std;
 
 namespace types {
+    static const vector<short> daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+
     class Date {
     private:
         int day, month, year;
         string date;
-        vector<short> daysInMonth = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
         bool checkDateValidity(const int& day, const int& month, const int& year) {
             if (day < 1 || day > 31)

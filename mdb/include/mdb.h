@@ -12,6 +12,7 @@ using namespace database;
 https://www.geeksforgeeks.org/scope-resolution-operator-in-c
 */
 namespace mdb {
+
     unique_ptr<IUser> createFreshUser(const string& name, const string& password) {
         return make_unique<User>(name, password, false);
     }

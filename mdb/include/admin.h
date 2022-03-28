@@ -13,6 +13,7 @@ using namespace mdb;
 using namespace database;
 
 namespace admin {
+
     void createAdmin(const string& name, const string& password) {
         unique_ptr<IUser> user;
         try {

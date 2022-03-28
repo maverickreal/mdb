@@ -24,7 +24,6 @@ namespace hashes {
         uint64_t operator()(const string& data)const {
             return XXHash64::hash(data.data(), data.length(), 7);
         }
-
     };
 }
 #endif
