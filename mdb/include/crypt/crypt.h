@@ -13,12 +13,12 @@ namespace crypt {
     class Crypt {
     public:
         static string encrypt(const string& s) {
-            int sz = s.length();
+            int sz = s.length(), i = 0;
             sz += 16 - (sz % 16);
 
-            vector<unsigned char> res, plain(sz);
+            vector<unsigned char> res, plain(sz, ' ');
             for (auto it = s.crbegin(); it != s.crend(); ++it)
-                plain[--sz] = *it;
+                plain[i++] = *it;
 
             res = aes.EncryptECB(plain, key);
             string str;
@@ -42,8 +42,8 @@ namespace crypt {
 
             v = aes.DecryptECB(v, key);
 
-            // while (!v.empty() && v.back() == ' ')
-            //     v.pop_back();
+            while (!v.empty() && v.back() == ' ')
+                v.pop_back();
             return string(v.begin(), v.end());
         }
     };
